@@ -9,10 +9,42 @@ export function Hero() {
     <section className="section-hero relative">
       {/* Three.js Canvas Background */}
       <Scene className="!pointer-events-auto">
-        <ambientLight intensity={0.5} />
-        <directionalLight position={[5, 5, 5]} intensity={1} />
-        <pointLight position={[-5, -5, 5]} intensity={0.3} color="#8B5CF6" />
-        
+        {/* Enhanced lighting setup for iridescent materials */}
+
+        {/* Ambient - low for dramatic contrast */}
+        <ambientLight intensity={0.3} />
+
+        {/* Key light - main illumination */}
+        <directionalLight
+          position={[10, 10, 5]}
+          intensity={2.0}
+          color="#ffffff"
+        />
+
+        {/* Fill light - warm side fill */}
+        <pointLight
+          position={[-8, 3, 8]}
+          intensity={0.8}
+          color="#ffd4a3"
+          distance={30}
+        />
+
+        {/* Rim light - cool backlight for edge definition */}
+        <pointLight
+          position={[0, -5, -10]}
+          intensity={1.2}
+          color="#60a5fa"
+          distance={40}
+        />
+
+        {/* Accent light - purple for iridescent pop */}
+        <pointLight
+          position={[5, -3, 5]}
+          intensity={0.6}
+          color="#a855f7"
+          distance={25}
+        />
+
         {/* Fragment Assembly Animation */}
         <FragmentAssembly autoPlay autoPlayDelay={800} />
       </Scene>
