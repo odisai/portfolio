@@ -1,5 +1,5 @@
-import { Hero } from "@/components/sections/Hero";
-import { SmoothScroll } from "@/components/layout/SmoothScroll";
+import { Hero } from "@/components/sections/hero";
+import { SmoothScroll } from "@/components/layout/smooth-scroll";
 
 export default function Home() {
   return (

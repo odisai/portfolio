@@ -1,6 +1,7 @@
 "use client";
 
-import { Scene } from "@/components/three/Scene";
+import { Scene } from "@/components/three/scene";
+import { FragmentAssembly } from "@/components/three/fragment-assembly";
 import { CONTENT } from "@/lib/constants";
 
 export function Hero() {
@@ -8,15 +9,12 @@ export function Hero() {
     <section className="section-hero relative">
       {/* Three.js Canvas Background */}
       <Scene className="!pointer-events-auto">
-        {/* FragmentAssembly component will go here */}
         <ambientLight intensity={0.5} />
         <directionalLight position={[5, 5, 5]} intensity={1} />
+        <pointLight position={[-5, -5, 5]} intensity={0.3} color="#8B5CF6" />
         
-        {/* Placeholder mesh - replace with FragmentAssembly */}
-        <mesh rotation={[0.4, 0.4, 0]}>
-          <boxGeometry args={[2, 2, 2]} />
-          <meshStandardMaterial color="#2563EB" metalness={0.5} roughness={0.2} />
-        </mesh>
+        {/* Fragment Assembly Animation */}
+        <FragmentAssembly autoPlay autoPlayDelay={800} />
       </Scene>
 
       {/* Content Layer */}
@@ -37,4 +35,3 @@ export function Hero() {
     </section>
   );
 }
-

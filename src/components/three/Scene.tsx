@@ -15,10 +15,9 @@ export function Scene({ children, className }: SceneProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const reducedMotion = useReducedMotion();
 
-  // Fallback for no WebGL support
   if (typeof window !== "undefined" && !isWebGL2Supported()) {
     return (
-      <div className={`webgl-fallback ${className}`}>
+      <div className={\`webgl-fallback \${className}\`}>
         <p className="text-white-muted">
           WebGL not supported. Please use a modern browser.
         </p>
@@ -27,7 +26,7 @@ export function Scene({ children, className }: SceneProps) {
   }
 
   return (
-    <div ref={containerRef} className={`canvas-container ${className}`}>
+    <div ref={containerRef} className={\`canvas-container \${className}\`}>
       <Canvas
         gl={{
           antialias: true,
@@ -54,4 +53,3 @@ export function Scene({ children, className }: SceneProps) {
     </div>
   );
 }
-
