@@ -1,13 +1,13 @@
 "use client";
 
-import { Suspense, useRef, useMemo, useState, useEffect } from "react";
+import { Suspense, useRef, useMemo } from "react";
 import { Canvas } from "@react-three/fiber";
 import { Preload, Environment } from "@react-three/drei";
 import { EffectComposer, Bloom, ChromaticAberration, DepthOfField } from "@react-three/postprocessing";
 import { BlendFunction } from "postprocessing";
 import * as THREE from "three";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
-import { isWebGL2Supported, cn } from "@/lib/utils";
+import { cn } from "@/lib/utils";
 import { SHADER } from "@/lib/constants";
 
 interface SceneProps {
@@ -49,26 +49,6 @@ function PostProcessing() {
 export function Scene({ children, className }: SceneProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const reducedMotion = useReducedMotion();
-  const [webglSupported, setWebglSupported] = useState<boolean | null>(null);
-
-  useEffect(() => {
-    setWebglSupported(isWebGL2Supported());
-  }, []);
-
-  // Show nothing during SSR/hydration to prevent mismatch
-  if (webglSupported === null) {
-    return <div className={cn("canvas-container", className)} />;
-  }
-
-  if (!webglSupported) {
-    return (
-      <div className={cn("webgl-fallback", className)}>
-        <p className="text-white-muted">
-          WebGL not supported. Please use a modern browser.
-        </p>
-      </div>
-    );
-  }
 
   return (
     <div ref={containerRef} className={cn("canvas-container", className)}>
