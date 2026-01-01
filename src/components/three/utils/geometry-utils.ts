@@ -1,9 +1,10 @@
 import * as THREE from "three";
 
 /**
- * Target vertex count for morphing - matches IcosahedronGeometry(radius, 4)
+ * Target vertex count for morphing - higher count = crisper letters
+ * Increased from 2,562 to 8,000 for better letter definition
  */
-export const TARGET_VERTEX_COUNT = 2562;
+export const TARGET_VERTEX_COUNT = 8000;
 
 /**
  * Linear interpolation
