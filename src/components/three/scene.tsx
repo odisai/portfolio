@@ -26,8 +26,8 @@ function PostProcessing() {
       <Bloom
         intensity={SHADER.BLOOM_INTENSITY}
         luminanceThreshold={SHADER.BLOOM_THRESHOLD}
-        luminanceSmoothing={0.9}
-        radius={0.8}
+        luminanceSmoothing={0.8}
+        radius={SHADER.BLOOM_RADIUS}
       />
       <ChromaticAberration
         blendFunction={BlendFunction.NORMAL}
