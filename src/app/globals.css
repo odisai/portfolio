@@ -228,12 +228,12 @@ body {
    ═══════════════════════════════════════════════════════════════════ */
 
 .canvas-container {
-  position: fixed;
+  position: absolute;
   top: 0;
   left: 0;
-  width: 100vw;
-  height: 100vh;
-  z-index: var(--z-background);
+  width: 100%;
+  height: 100%;
+  z-index: 0;
   pointer-events: none;
 }
 
@@ -321,6 +321,27 @@ body {
 .animate-pulse-glow { animation: pulse-glow 2s ease-in-out infinite; }
 .animate-fade-in-up { animation: fade-in-up 0.8s var(--ease-out-expo) forwards; }
 .animate-reveal { animation: reveal 0.6s var(--ease-out-expo) forwards; }
+
+/* Scroll indicator animation */
+@keyframes scroll-pulse {
+  0% { transform: translateY(-100%); opacity: 0; }
+  30% { opacity: 1; }
+  70% { opacity: 1; }
+  100% { transform: translateY(100%); opacity: 0; }
+}
+
+@keyframes bounce-subtle {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(3px); }
+}
+
+.animate-scroll-pulse { animation: scroll-pulse 2s ease-in-out infinite; }
+.animate-bounce-subtle { animation: bounce-subtle 2s ease-in-out infinite; }
+
+/* Word rotation transitions */
+.duration-800 { transition-duration: 800ms; }
+.duration-600 { transition-duration: 600ms; }
+.ease-out-expo { transition-timing-function: var(--ease-out-expo); }
 
 /* ═══════════════════════════════════════════════════════════════════
    LAYOUT UTILITIES

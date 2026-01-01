@@ -2,85 +2,101 @@
 
 import { useEffect, useMemo, useRef } from "react";
 import { useThree } from "@react-three/fiber";
-import { Text3D, Center } from "@react-three/drei";
 import * as THREE from "three";
 import { Fragment } from "./fragment";
 import { useAssembly } from "./hooks/use-assembly";
-import { CONTENT } from "@/lib/constants";
+
+// Generate simple letter positions for "TAYLOR ALLEN"
+function generateLetterPositions() {
+  const firstName = "TAYLOR";
+  const lastName = "ALLEN";
+  const positions: Array<{ x: number; y: number; letter: string }> = [];
+  
+  const letterSpacing = 1.2;
+  const rowSpacing = 1.8;
+  
+  // First row: TAYLOR
+  const firstRowWidth = firstName.length * letterSpacing;
+  const firstRowOffset = -firstRowWidth / 2 + letterSpacing / 2;
+  
+  firstName.split("").forEach((letter, i) => {
+    positions.push({
+      x: firstRowOffset + i * letterSpacing,
+      y: rowSpacing / 2,
+      letter,
+    });
+  });
+  
+  // Second row: ALLEN
+  const secondRowWidth = lastName.length * letterSpacing;
+  const secondRowOffset = -secondRowWidth / 2 + letterSpacing / 2;
+  
+  lastName.split("").forEach((letter, i) => {
+    positions.push({
+      x: secondRowOffset + i * letterSpacing,
+      y: -rowSpacing / 2,
+      letter,
+    });
+  });
+  
+  return positions;
+}
+
+const LETTER_POSITIONS = generateLetterPositions();
 
 interface FragmentAssemblyProps {
   autoPlay?: boolean;
   autoPlayDelay?: number;
+  onAssemblyComplete?: () => void;
+  onAssemblyProgress?: (progress: number) => void;
 }
 
-export function FragmentAssembly({ 
-  autoPlay = true, 
-  autoPlayDelay = 1000 
+export function FragmentAssembly({
+  autoPlay = true,
+  autoPlayDelay = 800,
+  onAssemblyComplete,
+  onAssemblyProgress,
 }: FragmentAssemblyProps) {
   const groupRef = useRef<THREE.Group>(null);
   const hasTriggeredRef = useRef(false);
   const { viewport } = useThree();
-  
-  // Calculate responsive scale based on viewport
+
+  // Calculate responsive scale
   const scale = useMemo(() => {
-    const baseScale = 0.5;
-    const minScale = 0.25;
-    const maxScale = 0.6;
+    const baseScale = 0.8;
     const viewportScale = Math.min(viewport.width / 12, viewport.height / 8);
-    return Math.max(minScale, Math.min(maxScale, baseScale * viewportScale));
+    return Math.max(0.4, Math.min(1.0, baseScale * viewportScale));
   }, [viewport.width, viewport.height]);
 
-  // Create letter geometries for "TAYLOR" and "ALLEN"
-  const letterData = useMemo(() => {
-    const firstName = CONTENT.NAME.split(" ")[0]; // "TAYLOR"
-    const lastName = CONTENT.NAME.split(" ")[1]; // "ALLEN"
+  // Create target positions from letter positions
+  const targetPositions = useMemo(() => {
+    return LETTER_POSITIONS.map((pos) => 
+      new THREE.Vector3(pos.x, pos.y, 0)
+    );
+  }, []);
+
+  // Create geometries for each fragment (using various polyhedra)
+  const geometries = useMemo(() => {
+    const geoTypes = [
+      () => new THREE.IcosahedronGeometry(0.3, 0),
+      () => new THREE.OctahedronGeometry(0.35, 0),
+      () => new THREE.TetrahedronGeometry(0.4, 0),
+      () => new THREE.DodecahedronGeometry(0.28, 0),
+      () => new THREE.BoxGeometry(0.5, 0.5, 0.5),
+    ];
     
-    const letters: { char: string; row: number; index: number }[] = [];
-    
-    // First name - top row
-    firstName.split("").forEach((char, i) => {
-      letters.push({ char, row: 0, index: i });
-    });
-    
-    // Last name - bottom row
-    lastName.split("").forEach((char, i) => {
-      letters.push({ char, row: 1, index: i });
-    });
-    
-    return letters;
+    return LETTER_POSITIONS.map((_, i) => geoTypes[i % geoTypes.length]());
   }, []);
 
   // Initialize assembly hook
-  const { fragments, setTargetPositions, triggerAssembly } = useAssembly({
-    fragmentCount: letterData.length,
+  const { fragments, triggerAssembly } = useAssembly({
+    targetPositions,
     scatterRadius: 12,
     assemblyDuration: 2.5,
-    staggerDelay: 0.06,
+    staggerDelay: 0.04,
+    onAssemblyComplete,
+    onAssemblyProgress,
   });
-
-  // Calculate target positions for assembled state
-  useEffect(() => {
-    const positions: THREE.Vector3[] = [];
-    const letterSpacing = 1.2;
-    const rowSpacing = 2.0;
-    
-    const firstName = CONTENT.NAME.split(" ")[0];
-    const lastName = CONTENT.NAME.split(" ")[1];
-    
-    // Calculate centering offsets
-    const firstRowWidth = (firstName.length - 1) * letterSpacing;
-    const secondRowWidth = (lastName.length - 1) * letterSpacing;
-    
-    letterData.forEach(({ row, index }) => {
-      const rowWidth = row === 0 ? firstRowWidth : secondRowWidth;
-      const x = (index * letterSpacing) - (rowWidth / 2);
-      const y = row === 0 ? rowSpacing / 2 : -rowSpacing / 2;
-      
-      positions.push(new THREE.Vector3(x, y, 0));
-    });
-    
-    setTargetPositions(positions);
-  }, [letterData, setTargetPositions]);
 
   // Auto-play assembly animation
   useEffect(() => {
@@ -89,35 +105,20 @@ export function FragmentAssembly({
       const timeout = setTimeout(() => {
         triggerAssembly();
       }, autoPlayDelay);
-      
+
       return () => clearTimeout(timeout);
     }
   }, [autoPlay, autoPlayDelay, triggerAssembly]);
-
-  // Create simple box geometries as letter placeholders
-  // In production, you'd use Text3D with a JSON font
-  const letterGeometries = useMemo(() => {
-    return letterData.map(({ char }) => {
-      // Create a box geometry sized based on character
-      const width = char === "I" ? 0.3 : char === "M" || char === "W" ? 1.0 : 0.7;
-      const height = 1.0;
-      const depth = 0.2;
-      
-      const geometry = new THREE.BoxGeometry(width, height, depth);
-      return geometry;
-    });
-  }, [letterData]);
 
   return (
     <group ref={groupRef} scale={scale}>
       {fragments.map((fragmentState, i) => (
         <Fragment
-          key={`fragment-${i}`}
+          key={i}
           state={fragmentState}
-          geometry={letterGeometries[i]}
+          geometry={geometries[i]}
         />
       ))}
     </group>
   );
 }
-
