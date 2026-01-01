@@ -412,7 +412,7 @@ html.lenis, html.lenis body {
 
 @layer base {
   * {
-    @apply border-border;
+    border-color: var(--color-space-300);
   }
 }
 
