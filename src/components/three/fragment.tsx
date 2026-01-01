@@ -11,6 +11,9 @@ interface FragmentProps {
   blobPositions: Float32Array;
   letterPositions: Float32Array;
   seed?: number;
+  cursorWorldPosition?: THREE.Vector3;
+  hoverRadius?: number;
+  scrollOpacity?: number;
 }
 
 // Premium iridescent/holographic vertex shader with morph support
@@ -19,6 +22,7 @@ const vertexShader = `
   uniform float uResolved;
   uniform float uMorphProgress;
   uniform float uSeed;
+  uniform float uHoverIntensity;
 
   attribute vec3 morphTarget;
 
@@ -27,6 +31,7 @@ const vertexShader = `
   varying vec2 vUv;
   varying vec3 vWorldPosition;
   varying float vDisplacement;
+  varying float vHoverIntensity;
 
   // Simplex noise functions
   vec3 mod289(vec3 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }
@@ -100,8 +105,10 @@ const vertexShader = `
     // Morph between blob and letter positions
     vec3 morphedPosition = mix(position, morphTarget, uMorphProgress);
 
-    // Organic blob deformation - reduces as we morph AND resolve
-    float deformAmount = mix(0.25, 0.0, max(uMorphProgress, uResolved));
+    // Organic blob deformation - smoothly disabled as morph completes AND when resolved
+    // Using smoothstep for clean transition, fully disabled when resolved for crisp letters
+    float morphFade = 1.0 - smoothstep(0.7, 1.0, uMorphProgress);
+    float deformAmount = 0.25 * morphFade * (1.0 - uResolved);
 
     // Multi-octave noise for organic feel
     float noise1 = snoise(morphedPosition * 2.0 + uTime * 0.5 + uSeed);
@@ -110,18 +117,24 @@ const vertexShader = `
 
     float totalNoise = (noise1 + noise2 + noise3) * deformAmount;
 
-    // Breathing/pulsing effect (reduces during morph)
-    float breathe = sin(uTime * 1.5 + uSeed) * 0.03 * (1.0 - max(uMorphProgress, uResolved));
+    // Breathing/pulsing effect - disabled when morphed or resolved for stable letters
+    float breathe = sin(uTime * 1.5 + uSeed) * 0.03 * (1.0 - uMorphProgress) * (1.0 - uResolved);
+
+    // Hover wobble effect - adds subtle oscillation when cursor is near
+    float hoverWobble = uHoverIntensity * sin(uTime * 8.0 + morphedPosition.x * 5.0) * 0.02;
+    float hoverLift = uHoverIntensity * 0.05; // Slight z-push toward camera
 
     // Calculate normal - blend between blob normal (radial) and geometry normal
     vec3 blobNormal = normalize(position);
     vec3 blendedNormal = mix(blobNormal, normal, uMorphProgress);
 
-    // Displaced position
-    vec3 displaced = morphedPosition + blendedNormal * (totalNoise + breathe);
+    // Displaced position with hover effects
+    vec3 displaced = morphedPosition + blendedNormal * (totalNoise + breathe + hoverWobble);
+    displaced.z += hoverLift;
 
     vDisplacement = totalNoise;
     vNormal = normalize(normalMatrix * blendedNormal);
+    vHoverIntensity = uHoverIntensity;
 
     vec4 mvPosition = modelViewMatrix * vec4(displaced, 1.0);
     vViewPosition = -mvPosition.xyz;
@@ -137,6 +150,7 @@ const fragmentShaderCode = `
   uniform float uResolved;
   uniform float uMorphProgress;
   uniform float uSeed;
+  uniform float uScrollOpacity;
   uniform vec3 uColorSearching;
   uniform vec3 uColorResolved;
   uniform vec3 uIridescentBlue;
@@ -147,6 +161,7 @@ const fragmentShaderCode = `
   varying vec2 vUv;
   varying vec3 vWorldPosition;
   varying float vDisplacement;
+  varying float vHoverIntensity;
 
   void main() {
     vec3 viewDir = normalize(vViewPosition);
@@ -192,36 +207,55 @@ const fragmentShaderCode = `
     vec3 searchingColor = uColorSearching + holoColor * 0.8;
     searchingColor += fresnel * holoColor * 0.5; // Extra rim iridescence
 
-    // Resolved state: bright with subtle iridescence (enhanced for letter readability)
+    // Resolved state: bright with reduced iridescence for cleaner letter readability
     vec3 resolvedColor = uColorResolved;
-    resolvedColor += holoColor * mix(0.15, 0.25, uMorphProgress); // More iridescence when letter
-    resolvedColor += fresnel * 0.3; // White rim glow
+    resolvedColor += holoColor * mix(0.12, 0.18, uMorphProgress); // Reduced iridescence
+    resolvedColor += fresnel * 0.2; // Reduced rim glow for cleaner edges
 
     // Transition between states
     vec3 finalColor = mix(searchingColor, resolvedColor, uResolved);
 
     // === FINAL ENHANCEMENTS ===
 
-    // Add specular highlight
+    // Add specular highlight (reduced intensity)
     vec3 lightDir = normalize(vec3(1.0, 1.0, 1.0));
     vec3 halfDir = normalize(lightDir + viewDir);
     float specular = pow(max(dot(normal, halfDir), 0.0), 64.0);
-    finalColor += specular * 0.4 * (1.0 - uResolved * 0.5);
+    finalColor += specular * 0.25 * (1.0 - uResolved * 0.6);
 
-    // Edge enhancement when morphed (helps letter readability)
-    float edgeBoost = uMorphProgress * 0.08 * (1.0 - NdotV);
+    // Edge enhancement - ACTIVE when morphed OR resolved for letter readability
+    // This is the key fix: edges stay defined in the resolved state
+    float edgeFactor = max(uMorphProgress, uResolved);
+    float edgeBoost = edgeFactor * 0.1 * (1.0 - NdotV);
     finalColor += edgeBoost;
 
-    // Boost overall brightness slightly
-    finalColor *= 1.1;
+    // === HOVER GLOW EFFECT ===
+    // Add warm glow and increased iridescence on hover (reduced intensity)
+    vec3 hoverGlow = vec3(1.0, 0.95, 0.9) * vHoverIntensity * 0.25;
+    vec3 hoverIridescence = holoColor * vHoverIntensity * 0.2;
+    finalColor += hoverGlow + hoverIridescence;
 
-    gl_FragColor = vec4(finalColor, 1.0);
+    // REMOVED: finalColor *= 1.1 - this was causing overbright/washout
+
+    // Apply scroll-based opacity fade
+    float finalOpacity = uScrollOpacity;
+
+    gl_FragColor = vec4(finalColor, finalOpacity);
   }
 `;
 
-export function Fragment({ state, blobPositions, letterPositions, seed = 0 }: FragmentProps) {
+export function Fragment({
+  state,
+  blobPositions,
+  letterPositions,
+  seed = 0,
+  cursorWorldPosition,
+  hoverRadius = 2,
+  scrollOpacity = 1,
+}: FragmentProps) {
   const meshRef = useRef<THREE.Mesh>(null);
   const materialRef = useRef<THREE.ShaderMaterial>(null);
+  const hoverIntensityRef = useRef(0);
 
   // Create geometry with morph target attribute
   const morphGeometry = useMemo(() => {
@@ -299,6 +333,8 @@ export function Fragment({ state, blobPositions, letterPositions, seed = 0 }: Fr
         uTime: { value: 0 },
         uResolved: { value: 0 },
         uMorphProgress: { value: 0 },
+        uHoverIntensity: { value: 0 },
+        uScrollOpacity: { value: 1 },
         uSeed: { value: seed },
         uColorSearching: { value: new THREE.Vector3(...SHADER.COLORS.SEARCHING) },
         uColorResolved: { value: new THREE.Vector3(...SHADER.COLORS.RESOLVED) },
@@ -308,6 +344,7 @@ export function Fragment({ state, blobPositions, letterPositions, seed = 0 }: Fr
       vertexShader,
       fragmentShader: fragmentShaderCode,
       side: THREE.DoubleSide,
+      transparent: true,
     });
   }, [seed]);
 
@@ -318,10 +355,25 @@ export function Fragment({ state, blobPositions, letterPositions, seed = 0 }: Fr
       meshRef.current.scale.copy(state.scale);
     }
 
+    // Calculate hover intensity based on cursor distance
+    if (cursorWorldPosition && materialRef.current) {
+      const distance = state.position.distanceTo(cursorWorldPosition);
+      const targetIntensity = distance < hoverRadius
+        ? Math.pow(1 - distance / hoverRadius, 2) // Quadratic falloff
+        : 0;
+
+      // Smooth interpolation for fluid hover response
+      hoverIntensityRef.current += (targetIntensity - hoverIntensityRef.current) * 0.15;
+    } else {
+      hoverIntensityRef.current *= 0.9; // Decay when no cursor
+    }
+
     if (materialRef.current) {
       materialRef.current.uniforms.uTime.value = clock.getElapsedTime();
       materialRef.current.uniforms.uResolved.value = state.resolved;
       materialRef.current.uniforms.uMorphProgress.value = state.morphProgress;
+      materialRef.current.uniforms.uHoverIntensity.value = hoverIntensityRef.current;
+      materialRef.current.uniforms.uScrollOpacity.value = scrollOpacity;
     }
   });
 
