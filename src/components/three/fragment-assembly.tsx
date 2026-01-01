@@ -1,11 +1,12 @@
 "use client";
 
-import { useEffect, useMemo, useRef } from "react";
-import { useThree } from "@react-three/fiber";
+import { useEffect, useMemo, useRef, useCallback } from "react";
+import { useThree, useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 import { Fragment } from "./fragment";
 import { useAssembly } from "./hooks/use-assembly";
 import { useTextGeometries } from "./hooks/use-text-geometries";
+import { useScrollEffects } from "./hooks/use-scroll-effects";
 import { createMorphableBlobPositions, TARGET_VERTEX_COUNT } from "./utils/geometry-utils";
 
 // Generate letter positions for "TAYLOR ALLEN"
@@ -61,7 +62,52 @@ export function FragmentAssembly({
 }: FragmentAssemblyProps) {
   const groupRef = useRef<THREE.Group>(null);
   const hasTriggeredRef = useRef(false);
-  const { viewport } = useThree();
+  const { viewport, camera, gl } = useThree();
+
+  // Cursor tracking for hover interactions
+  const mouseRef = useRef(new THREE.Vector2());
+  const raycasterRef = useRef(new THREE.Raycaster());
+  const cursorWorldPosRef = useRef(new THREE.Vector3());
+  const planeRef = useRef(new THREE.Plane(new THREE.Vector3(0, 0, 1), 0));
+
+  // Mouse move handler
+  const handleMouseMove = useCallback((event: MouseEvent) => {
+    const rect = gl.domElement.getBoundingClientRect();
+    mouseRef.current.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+    mouseRef.current.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+  }, [gl.domElement]);
+
+  // Set up mouse tracking
+  useEffect(() => {
+    const canvas = gl.domElement;
+    canvas.addEventListener("mousemove", handleMouseMove);
+    return () => canvas.removeEventListener("mousemove", handleMouseMove);
+  }, [gl.domElement, handleMouseMove]);
+
+  // Update cursor world position each frame
+  useFrame(() => {
+    raycasterRef.current.setFromCamera(mouseRef.current, camera);
+    raycasterRef.current.ray.intersectPlane(planeRef.current, cursorWorldPosRef.current);
+  });
+
+  // Scroll effects for parallax depth
+  const scrollEffects = useScrollEffects({
+    enabled: true,
+    maxScroll: 500,
+    smoothness: 0.06,
+  });
+
+  // Apply scroll effects to group
+  useFrame(() => {
+    if (groupRef.current) {
+      // Apply scroll-based z offset for depth effect
+      groupRef.current.position.z = scrollEffects.zOffset;
+
+      // Apply subtle scale reduction on scroll
+      const scrollScale = scale * scrollEffects.scale;
+      groupRef.current.scale.setScalar(scrollScale);
+    }
+  });
 
   // Calculate responsive scale
   const scale = useMemo(() => {
@@ -135,6 +181,9 @@ export function FragmentAssembly({
           blobPositions={blobPositionsArray[i]}
           letterPositions={textPositions[i]}
           seed={seeds[i]}
+          cursorWorldPosition={cursorWorldPosRef.current}
+          hoverRadius={2.5}
+          scrollOpacity={scrollEffects.opacity}
         />
       ))}
     </group>
