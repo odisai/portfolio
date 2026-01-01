@@ -5,20 +5,22 @@ import { useThree } from "@react-three/fiber";
 import * as THREE from "three";
 import { Fragment } from "./fragment";
 import { useAssembly } from "./hooks/use-assembly";
+import { useTextGeometries } from "./hooks/use-text-geometries";
+import { createMorphableBlobPositions, TARGET_VERTEX_COUNT } from "./utils/geometry-utils";
 
-// Generate simple letter positions for "TAYLOR ALLEN"
+// Generate letter positions for "TAYLOR ALLEN"
 function generateLetterPositions() {
   const firstName = "TAYLOR";
   const lastName = "ALLEN";
   const positions: Array<{ x: number; y: number; letter: string }> = [];
-  
-  const letterSpacing = 1.2;
-  const rowSpacing = 1.8;
-  
+
+  const letterSpacing = 0.9;
+  const rowSpacing = 1.4;
+
   // First row: TAYLOR
   const firstRowWidth = firstName.length * letterSpacing;
   const firstRowOffset = -firstRowWidth / 2 + letterSpacing / 2;
-  
+
   firstName.split("").forEach((letter, i) => {
     positions.push({
       x: firstRowOffset + i * letterSpacing,
@@ -26,11 +28,11 @@ function generateLetterPositions() {
       letter,
     });
   });
-  
+
   // Second row: ALLEN
   const secondRowWidth = lastName.length * letterSpacing;
   const secondRowOffset = -secondRowWidth / 2 + letterSpacing / 2;
-  
+
   lastName.split("").forEach((letter, i) => {
     positions.push({
       x: secondRowOffset + i * letterSpacing,
@@ -38,7 +40,7 @@ function generateLetterPositions() {
       letter,
     });
   });
-  
+
   return positions;
 }
 
@@ -63,44 +65,53 @@ export function FragmentAssembly({
 
   // Calculate responsive scale
   const scale = useMemo(() => {
-    const baseScale = 0.8;
-    const viewportScale = Math.min(viewport.width / 12, viewport.height / 8);
-    return Math.max(0.4, Math.min(1.0, baseScale * viewportScale));
+    const baseScale = 1.2;
+    const viewportScale = Math.min(viewport.width / 10, viewport.height / 6);
+    return Math.max(0.6, Math.min(1.5, baseScale * viewportScale));
   }, [viewport.width, viewport.height]);
+
+  // Extract just the letters for text geometry generation
+  const letters = useMemo(() => {
+    return LETTER_POSITIONS.map((pos) => pos.letter);
+  }, []);
+
+  // Load text geometries for morphing
+  const { letterPositions: textPositions, isLoaded: fontLoaded } = useTextGeometries(letters);
 
   // Create target positions from letter positions
   const targetPositions = useMemo(() => {
-    return LETTER_POSITIONS.map((pos) => 
-      new THREE.Vector3(pos.x, pos.y, 0)
-    );
+    return LETTER_POSITIONS.map((pos) => new THREE.Vector3(pos.x, pos.y, 0));
   }, []);
 
-  // Create geometries for each fragment (using various polyhedra)
-  const geometries = useMemo(() => {
-    const geoTypes = [
-      () => new THREE.IcosahedronGeometry(0.3, 0),
-      () => new THREE.OctahedronGeometry(0.35, 0),
-      () => new THREE.TetrahedronGeometry(0.4, 0),
-      () => new THREE.DodecahedronGeometry(0.28, 0),
-      () => new THREE.BoxGeometry(0.5, 0.5, 0.5),
-    ];
-    
-    return LETTER_POSITIONS.map((_, i) => geoTypes[i % geoTypes.length]());
+  // Create blob positions with matching vertex count for each fragment
+  const blobPositionsArray = useMemo(() => {
+    const sizes = [0.32, 0.36, 0.34, 0.38, 0.33, 0.35, 0.37, 0.34, 0.36, 0.34, 0.32];
+
+    return LETTER_POSITIONS.map((_, i) => {
+      const size = sizes[i % sizes.length];
+      const seed = i * 1.5 + 0.5;
+      return createMorphableBlobPositions(TARGET_VERTEX_COUNT, size, seed);
+    });
+  }, []);
+
+  // Seeds for each fragment's shader animation
+  const seeds = useMemo(() => {
+    return LETTER_POSITIONS.map((_, i) => i * 1.7 + 0.3);
   }, []);
 
   // Initialize assembly hook
   const { fragments, triggerAssembly } = useAssembly({
     targetPositions,
-    scatterRadius: 12,
-    assemblyDuration: 2.5,
-    staggerDelay: 0.04,
+    scatterRadius: 15,
+    assemblyDuration: 3.0,
+    staggerDelay: 0.06,
     onAssemblyComplete,
     onAssemblyProgress,
   });
 
   // Auto-play assembly animation
   useEffect(() => {
-    if (autoPlay && !hasTriggeredRef.current) {
+    if (autoPlay && !hasTriggeredRef.current && fontLoaded) {
       hasTriggeredRef.current = true;
       const timeout = setTimeout(() => {
         triggerAssembly();
@@ -108,7 +119,12 @@ export function FragmentAssembly({
 
       return () => clearTimeout(timeout);
     }
-  }, [autoPlay, autoPlayDelay, triggerAssembly]);
+  }, [autoPlay, autoPlayDelay, triggerAssembly, fontLoaded]);
+
+  // Don't render until font is loaded
+  if (!fontLoaded || textPositions.length === 0) {
+    return null;
+  }
 
   return (
     <group ref={groupRef} scale={scale}>
@@ -116,7 +132,9 @@ export function FragmentAssembly({
         <Fragment
           key={i}
           state={fragmentState}
-          geometry={geometries[i]}
+          blobPositions={blobPositionsArray[i]}
+          letterPositions={textPositions[i]}
+          seed={seeds[i]}
         />
       ))}
     </group>
