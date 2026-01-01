@@ -35,16 +35,19 @@ export const ANIMATION = {
 export const SHADER = {
   // Fragment colors (as RGB arrays for shaders)
   COLORS: {
-    SEARCHING: [0.1, 0.1, 0.12],
-    RESOLVED: [0.96, 0.96, 0.98],
-    IRIDESCENT_BLUE: [0.23, 0.51, 0.97],
-    IRIDESCENT_PURPLE: [0.55, 0.36, 0.97],
+    // Darker searching state for more dramatic contrast
+    SEARCHING: [0.08, 0.08, 0.1],
+    // Bright resolved state
+    RESOLVED: [0.98, 0.98, 1.0],
+    // Vibrant iridescent colors
+    IRIDESCENT_BLUE: [0.2, 0.6, 1.0],
+    IRIDESCENT_PURPLE: [0.7, 0.3, 1.0],
   },
-  
-  // Post-processing
-  BLOOM_INTENSITY: 0.3,
-  BLOOM_THRESHOLD: 0.8,
-  CHROMATIC_ABERRATION: 0.002,
+
+  // Post-processing - enhanced for cinematic look
+  BLOOM_INTENSITY: 1.2,
+  BLOOM_THRESHOLD: 0.3,
+  CHROMATIC_ABERRATION: 0.003,
 } as const;
 
 // ═══════════════════════════════════════════════════════════════════
