@@ -48,15 +48,14 @@ export function debounce<T extends (...args: unknown[]) => void>(
   };
 }
 
-// Check if WebGL2 is supported
+// Check if WebGL is supported (WebGL2 preferred, WebGL1 fallback)
 export function isWebGL2Supported(): boolean {
   if (typeof window === "undefined") return false;
   try {
     const canvas = document.createElement("canvas");
-    return !!(
-      window.WebGL2RenderingContext &&
-      canvas.getContext("webgl2")
-    );
+    // Try WebGL2 first, fall back to WebGL1
+    const gl = canvas.getContext("webgl2") || canvas.getContext("webgl") || canvas.getContext("experimental-webgl");
+    return !!gl;
   } catch {
     return false;
   }
