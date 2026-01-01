@@ -7,6 +7,8 @@ interface UseScrollEffectsOptions {
   enabled?: boolean;
   maxScroll?: number; // Pixels at which effect is fully applied
   smoothness?: number; // Interpolation factor (0-1)
+  zCompressionEnabled?: boolean;
+  zCompressionAmount?: number;
 }
 
 interface ScrollEffects {
@@ -20,12 +22,18 @@ interface ScrollEffects {
   opacity: number;
   /** Letter spread multiplier (0 at top, positive when scrolled) */
   spread: number;
+  /** Z-compression factor (letters flatten as you scroll) */
+  zCompression: number;
+  /** Whether the hero is in pinned scroll zone */
+  isPinned: boolean;
 }
 
 export function useScrollEffects({
   enabled = true,
   maxScroll = 400,
   smoothness = 0.08,
+  zCompressionEnabled = true,
+  zCompressionAmount = 0.3,
 }: UseScrollEffectsOptions = {}): ScrollEffects {
   const scrollRef = useRef(0);
   const targetRef = useRef(0);
@@ -35,6 +43,8 @@ export function useScrollEffects({
     zOffset: 0,
     opacity: 1,
     spread: 0,
+    zCompression: 0,
+    isPinned: false,
   });
 
   const handleScroll = useCallback(() => {
@@ -59,6 +69,12 @@ export function useScrollEffects({
 
     const progress = scrollRef.current;
 
+    // Z-compression: letters appear to "flatten" as you scroll
+    const zCompression = zCompressionEnabled ? progress * zCompressionAmount : 0;
+
+    // Pin detection (for future scroll-trigger integration)
+    const isPinned = progress > 0.1 && progress < 0.9;
+
     // Update effects based on scroll progress
     effectsRef.current = {
       progress,
@@ -66,6 +82,8 @@ export function useScrollEffects({
       zOffset: -progress * 3, // Push back 3 units
       opacity: 1 - progress * 0.6, // Fade to 40% opacity
       spread: progress * 0.3, // Spread letters apart slightly
+      zCompression,
+      isPinned,
     };
   });
 

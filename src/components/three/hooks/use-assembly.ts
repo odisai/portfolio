@@ -132,13 +132,13 @@ export function useAssembly({
         delay * 0.5 // Stagger the pop-in
       );
 
-      // Movement to target position
+      // Movement to target position with spring overshoot
       tl.to(
         fragment,
         {
           progress: 1,
           duration: assemblyDuration,
-          ease: "expo.out",
+          ease: `elastic.out(${ANIMATION.SPRING.ASSEMBLY_ELASTICITY}, ${ANIMATION.SPRING.ASSEMBLY_DAMPING})`,
         },
         delay + 0.3 // Start moving after pop-in begins
       );
@@ -163,6 +163,19 @@ export function useAssembly({
           ease: "power2.out",
         },
         delay + assemblyDuration * 0.6
+      );
+
+      // Settle animation - bouncy final placement
+      tl.to(
+        fragment.scale,
+        {
+          x: 1,
+          y: 1,
+          z: 1,
+          duration: 0.4,
+          ease: `elastic.out(${ANIMATION.SPRING.SETTLE_ELASTICITY}, ${ANIMATION.SPRING.SETTLE_DAMPING})`,
+        },
+        delay + assemblyDuration * 0.9
       );
     });
 

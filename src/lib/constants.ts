@@ -52,11 +52,11 @@ export const SHADER = {
     IRIDESCENT_PURPLE: [0.7, 0.3, 1.0],
   },
 
-  // Post-processing - rebalanced for readability
-  BLOOM_INTENSITY: 0.5,
-  BLOOM_THRESHOLD: 0.7,
-  BLOOM_RADIUS: 0.6,
-  CHROMATIC_ABERRATION: 0.002,
+  // Post-processing - optimized for crisp letter readability
+  BLOOM_INTENSITY: 0.25,
+  BLOOM_THRESHOLD: 0.85,
+  BLOOM_RADIUS: 0.35,
+  CHROMATIC_ABERRATION: 0.0003,
 
   // Depth of Field settings
   DOF: {
