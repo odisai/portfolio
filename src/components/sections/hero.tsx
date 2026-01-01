@@ -2,48 +2,52 @@
 
 import { Scene } from "@/components/three/scene";
 import { FragmentAssembly } from "@/components/three/fragment-assembly";
-import { CONTENT } from "@/lib/constants";
+import { CameraController } from "@/components/three/camera-controller";
+import { CONTENT, SHADER } from "@/lib/constants";
 
 export function Hero() {
   return (
     <section className="section-hero relative">
       {/* Three.js Canvas Background */}
       <Scene className="!pointer-events-auto">
-        {/* Enhanced lighting setup for iridescent materials */}
+        {/* Enhanced lighting setup - rebalanced for letter readability */}
 
-        {/* Ambient - low for dramatic contrast */}
-        <ambientLight intensity={0.3} />
+        {/* Ambient - slightly increased for base visibility */}
+        <ambientLight intensity={SHADER.LIGHTING.AMBIENT_INTENSITY} />
 
-        {/* Key light - main illumination */}
+        {/* Key light - reduced for less washout */}
         <directionalLight
           position={[10, 10, 5]}
-          intensity={2.0}
+          intensity={SHADER.LIGHTING.KEY_INTENSITY}
           color="#ffffff"
         />
 
-        {/* Fill light - warm side fill */}
+        {/* Fill light - warm side fill, reduced */}
         <pointLight
           position={[-8, 3, 8]}
-          intensity={0.8}
+          intensity={SHADER.LIGHTING.FILL_INTENSITY}
           color="#ffd4a3"
           distance={30}
         />
 
-        {/* Rim light - cool backlight for edge definition */}
+        {/* Rim light - significantly reduced to prevent edge blowout */}
         <pointLight
           position={[0, -5, -10]}
-          intensity={1.2}
+          intensity={SHADER.LIGHTING.RIM_INTENSITY}
           color="#60a5fa"
           distance={40}
         />
 
-        {/* Accent light - purple for iridescent pop */}
+        {/* Accent light - purple for iridescent pop, reduced */}
         <pointLight
           position={[5, -3, 5]}
-          intensity={0.6}
+          intensity={SHADER.LIGHTING.ACCENT_INTENSITY}
           color="#a855f7"
           distance={25}
         />
+
+        {/* Parallax Camera Controller */}
+        <CameraController intensity={2.5} smoothness={0.06} idleDrift />
 
         {/* Fragment Assembly Animation */}
         <FragmentAssembly autoPlay autoPlayDelay={800} />
