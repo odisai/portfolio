@@ -7,7 +7,6 @@ import { CameraController } from "@/components/three/camera-controller";
 import { AmbientParticles } from "@/components/three/ambient-particles";
 import { DescriptorText } from "@/components/ui/descriptor-text";
 import { Navbar } from "@/components/ui/navbar";
-import { LiveTimestamp } from "@/components/ui/live-timestamp";
 import { CONTENT, SHADER } from "@/lib/constants";
 
 export function Hero() {
@@ -88,19 +87,14 @@ export function Hero() {
         <div className="absolute left-8 bottom-8 text-[0.625rem] tracking-widest uppercase text-white/40">
           {CONTENT.LOCATION}
         </div>
+      </div>
 
-        {/* Live timestamp */}
-        <div className="absolute right-8 top-1/2 -translate-y-1/2 text-[0.625rem] tracking-widest uppercase text-white/30">
-          <LiveTimestamp />
-        </div>
-
-        {/* Scroll indicator */}
-        <div className="absolute left-1/2 -translate-x-1/2 bottom-8 flex flex-col items-center gap-2">
-          <span className="text-[0.5rem] tracking-[0.25em] uppercase text-white/30">
-            Scroll
-          </span>
-          <div className="w-px h-12 bg-gradient-to-b from-white/20 to-transparent" />
-        </div>
+      {/* Scroll indicator - positioned relative to section */}
+      <div className="absolute left-1/2 -translate-x-1/2 bottom-8 flex flex-col items-center gap-2 z-10 pointer-events-none">
+        <span className="text-[0.5rem] tracking-[0.25em] uppercase text-white/30">
+          Scroll
+        </span>
+        <div className="w-px h-12 bg-gradient-to-b from-white/20 to-transparent" />
       </div>
     </section>
   );
