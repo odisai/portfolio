@@ -1,13 +1,32 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { Scene } from "@/components/three/scene";
 import { FragmentAssembly } from "@/components/three/fragment-assembly";
 import { CameraController } from "@/components/three/camera-controller";
+import { AmbientParticles } from "@/components/three/ambient-particles";
+import { DescriptorText } from "@/components/ui/descriptor-text";
+import { Navbar } from "@/components/ui/navbar";
+import { LiveTimestamp } from "@/components/ui/live-timestamp";
 import { CONTENT, SHADER } from "@/lib/constants";
 
 export function Hero() {
+  const [assemblyComplete, setAssemblyComplete] = useState(false);
+  const [navVisible, setNavVisible] = useState(false);
+
+  // Show nav 300ms after assembly completes
+  useEffect(() => {
+    if (assemblyComplete) {
+      const timer = setTimeout(() => setNavVisible(true), 300);
+      return () => clearTimeout(timer);
+    }
+  }, [assemblyComplete]);
+
   return (
     <section className="section-hero relative">
+      {/* Navigation - slides in after assembly */}
+      <Navbar visible={navVisible} />
+
       {/* Three.js Canvas Background */}
       <Scene className="!pointer-events-auto">
         {/* Enhanced lighting setup - rebalanced for letter readability */}
@@ -46,26 +65,41 @@ export function Hero() {
           distance={25}
         />
 
+        {/* Ambient Particle Field - minimal */}
+        <AmbientParticles count={80} opacity={0.25} speed={0.08} />
+
         {/* Parallax Camera Controller */}
         <CameraController intensity={2.5} smoothness={0.06} idleDrift />
 
         {/* Fragment Assembly Animation */}
-        <FragmentAssembly autoPlay autoPlayDelay={800} />
+        <FragmentAssembly
+          autoPlay
+          autoPlayDelay={800}
+          onAssemblyComplete={() => setAssemblyComplete(true)}
+        />
       </Scene>
 
       {/* Content Layer */}
       <div className="container-portfolio relative z-10 pointer-events-none">
+        {/* Descriptor Text - appears after assembly */}
+        <DescriptorText assemblyComplete={assemblyComplete} />
+
         {/* Location badge */}
-        <div className="absolute left-8 bottom-8 text-[0.75rem] tracking-wider uppercase text-white-muted">
+        <div className="absolute left-8 bottom-8 text-[0.625rem] tracking-widest uppercase text-white/40">
           {CONTENT.LOCATION}
         </div>
 
+        {/* Live timestamp */}
+        <div className="absolute right-8 top-1/2 -translate-y-1/2 text-[0.625rem] tracking-widest uppercase text-white/30">
+          <LiveTimestamp />
+        </div>
+
         {/* Scroll indicator */}
-        <div className="absolute right-8 bottom-8 flex flex-col items-center gap-2">
-          <span className="text-[0.625rem] tracking-widest uppercase text-white-dim">
+        <div className="absolute left-1/2 -translate-x-1/2 bottom-8 flex flex-col items-center gap-2">
+          <span className="text-[0.5rem] tracking-[0.25em] uppercase text-white/30">
             Scroll
           </span>
-          <div className="w-px h-16 bg-gradient-to-b from-transparent via-white-dim to-transparent" />
+          <div className="w-px h-12 bg-gradient-to-b from-white/20 to-transparent" />
         </div>
       </div>
     </section>

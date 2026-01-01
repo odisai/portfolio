@@ -3,7 +3,7 @@
 import { Suspense, useRef, useMemo } from "react";
 import { Canvas } from "@react-three/fiber";
 import { Preload, Environment } from "@react-three/drei";
-import { EffectComposer, Bloom, ChromaticAberration } from "@react-three/postprocessing";
+import { EffectComposer, Bloom, ChromaticAberration, DepthOfField } from "@react-three/postprocessing";
 import { BlendFunction } from "postprocessing";
 import * as THREE from "three";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
@@ -23,6 +23,13 @@ function PostProcessing() {
 
   return (
     <EffectComposer>
+      {/* Depth of Field - subtle cinematic blur */}
+      <DepthOfField
+        focusDistance={SHADER.DOF.FOCUS_DISTANCE}
+        focalLength={SHADER.DOF.FOCAL_LENGTH}
+        bokehScale={SHADER.DOF.BOKEH_SCALE}
+        height={SHADER.DOF.HEIGHT}
+      />
       <Bloom
         intensity={SHADER.BLOOM_INTENSITY}
         luminanceThreshold={SHADER.BLOOM_THRESHOLD}
