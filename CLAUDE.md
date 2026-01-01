@@ -4,10 +4,13 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Commands
 
+**Use pnpm for all package management.**
+
 ```bash
-npm run dev     # Development server (uses webpack, not Turbopack)
-npm run build   # Production build
-npm run lint    # ESLint
+pnpm dev                    # Development server
+pnpm build                  # Production build (uses webpack for shader imports)
+pnpm next build --webpack   # Explicit webpack build (required for shaders)
+pnpm lint                   # ESLint
 ```
 
 ## Architecture
@@ -51,6 +54,19 @@ Three variable fonts loaded in `layout.tsx`:
 - JetBrains Mono (code): `--font-jetbrains`
 
 Font JSON for Three.js TextGeometry lives at `public/fonts/satoshi-bold.json`.
+
+### Page Sections
+
+The main page (`src/app/page.tsx`) renders these sections in order:
+
+1. **Hero** (`sections/hero.tsx`) - 3D shader animation, navbar, descriptor text rotation
+2. **CurrentBuild** (`sections/current-build.tsx`) - OdisAI feature with Problem/Solution slider
+3. **Archive** (`sections/archive.tsx`) - Horizontal scroll gallery of past projects
+4. **Method** (`sections/method.tsx`) - Philosophy statements with scroll-triggered word animations
+5. **Credentials** (`sections/credentials.tsx`) - Timeline and Stanford callout
+6. **Contact** (`sections/contact.tsx`) - CTA with email form and footer
+
+All sections use Framer Motion for scroll-triggered animations.
 
 ### Path Aliases
 
