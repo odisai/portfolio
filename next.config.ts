@@ -4,7 +4,7 @@ const nextConfig: NextConfig = {
   // Disable React Compiler for Three.js compatibility
   // React Compiler doesn't work well with mutable Three.js objects
   reactCompiler: false,
-  
+
   // Configure webpack for raw shader imports
   webpack: (config) => {
     config.module.rules.push({
@@ -13,9 +13,9 @@ const nextConfig: NextConfig = {
     });
     return config;
   },
-  
-  // Use webpack instead of Turbopack for shader imports
-  // turbopack doesn't support ?raw imports well
+
+  // Empty turbopack config to suppress warning when using webpack
+  turbopack: {},
 };
 
 export default nextConfig;
