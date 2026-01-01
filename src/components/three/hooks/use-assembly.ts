@@ -16,6 +16,11 @@ export interface FragmentState {
   scatteredRotation: THREE.Euler;
   progress: number;
   resolved: number;
+  morphProgress: number; // 0 = blob, 1 = letter shape
+  // For floating animation
+  floatOffset: THREE.Vector3;
+  floatSpeed: number;
+  rotationSpeed: THREE.Vector3;
 }
 
 interface UseAssemblyOptions {
@@ -31,31 +36,47 @@ export function useAssembly({
   targetPositions,
   scatterRadius = 15,
   assemblyDuration = ANIMATION.ASSEMBLY_DURATION / 1000,
-  staggerDelay = 0.04,
+  staggerDelay = 0.06,
   onAssemblyComplete,
   onAssemblyProgress,
 }: UseAssemblyOptions) {
   const timelineRef = useRef<gsap.core.Timeline | null>(null);
   const isAssembledRef = useRef(false);
+  const timeRef = useRef(0);
 
-  // Create fragment states
+  // Create fragment states with enhanced properties
   const fragments = useMemo<FragmentState[]>(() => {
-    return targetPositions.map((targetPosition) => {
-      // Random scattered position
+    return targetPositions.map((targetPosition, index) => {
+      // Random scattered position - distributed in a sphere around the scene
       const theta = random(0, Math.PI * 2);
       const phi = random(0, Math.PI);
-      const r = random(scatterRadius * 0.5, scatterRadius);
+      const r = random(scatterRadius * 0.6, scatterRadius);
 
       const scatteredPosition = new THREE.Vector3(
         r * Math.sin(phi) * Math.cos(theta),
         r * Math.sin(phi) * Math.sin(theta),
-        r * Math.cos(phi) - 5
+        r * Math.cos(phi) - 3 // Slightly behind camera
       );
 
       const scatteredRotation = new THREE.Euler(
         random(-Math.PI, Math.PI),
         random(-Math.PI, Math.PI),
         random(-Math.PI, Math.PI)
+      );
+
+      // Floating animation parameters - each fragment floats uniquely
+      const floatOffset = new THREE.Vector3(
+        random(-1, 1),
+        random(-1, 1),
+        random(-0.5, 0.5)
+      );
+
+      const floatSpeed = random(0.3, 0.7);
+
+      const rotationSpeed = new THREE.Vector3(
+        random(-0.3, 0.3),
+        random(-0.3, 0.3),
+        random(-0.2, 0.2)
       );
 
       return {
@@ -67,6 +88,10 @@ export function useAssembly({
         scatteredRotation,
         progress: 0,
         resolved: 0,
+        morphProgress: 0, // Start as blob
+        floatOffset,
+        floatSpeed,
+        rotationSpeed,
       };
     });
   }, [targetPositions, scatterRadius]);
@@ -94,6 +119,20 @@ export function useAssembly({
     fragments.forEach((fragment, i) => {
       const delay = i * staggerDelay;
 
+      // Pop-in scale animation (elastic)
+      tl.to(
+        fragment.scale,
+        {
+          x: 1,
+          y: 1,
+          z: 1,
+          duration: 0.6,
+          ease: "elastic.out(1, 0.5)",
+        },
+        delay * 0.5 // Stagger the pop-in
+      );
+
+      // Movement to target position
       tl.to(
         fragment,
         {
@@ -101,14 +140,26 @@ export function useAssembly({
           duration: assemblyDuration,
           ease: "expo.out",
         },
-        delay
+        delay + 0.3 // Start moving after pop-in begins
       );
 
+      // Morph from blob to letter (starts 30% into movement, overlaps)
+      tl.to(
+        fragment,
+        {
+          morphProgress: 1,
+          duration: assemblyDuration * 0.8,
+          ease: "power2.inOut", // Smooth morph
+        },
+        delay + assemblyDuration * 0.3 // Start morphing 30% into movement
+      );
+
+      // Color transition to resolved state (after morph is mostly done)
       tl.to(
         fragment,
         {
           resolved: 1,
-          duration: assemblyDuration * 0.4,
+          duration: assemblyDuration * 0.5,
           ease: "power2.out",
         },
         delay + assemblyDuration * 0.6
@@ -120,18 +171,51 @@ export function useAssembly({
   }, [fragments, assemblyDuration, staggerDelay, onAssemblyComplete, onAssemblyProgress]);
 
   // Update fragment transforms each frame
-  useFrame(() => {
+  useFrame((state, delta) => {
+    timeRef.current += delta;
+    const time = timeRef.current;
+
     fragments.forEach((fragment) => {
-      const { progress, scatteredPosition, targetPosition, scatteredRotation } = fragment;
+      const {
+        progress,
+        scatteredPosition,
+        targetPosition,
+        scatteredRotation,
+        floatOffset,
+        floatSpeed,
+        rotationSpeed,
+        resolved
+      } = fragment;
+
+      // Smooth easing for position interpolation
       const easedProgress = progress * progress * (3 - 2 * progress);
 
-      fragment.position.x = lerp(scatteredPosition.x, targetPosition.x, easedProgress);
-      fragment.position.y = lerp(scatteredPosition.y, targetPosition.y, easedProgress);
-      fragment.position.z = lerp(scatteredPosition.z, targetPosition.z, easedProgress);
+      // Calculate base position (lerp between scattered and target)
+      const baseX = lerp(scatteredPosition.x, targetPosition.x, easedProgress);
+      const baseY = lerp(scatteredPosition.y, targetPosition.y, easedProgress);
+      const baseZ = lerp(scatteredPosition.z, targetPosition.z, easedProgress);
 
-      fragment.rotation.x = lerp(scatteredRotation.x, 0, easedProgress);
-      fragment.rotation.y = lerp(scatteredRotation.y, 0, easedProgress);
-      fragment.rotation.z = lerp(scatteredRotation.z, 0, easedProgress);
+      // Add floating motion (reduces as progress increases)
+      const floatIntensity = (1 - easedProgress) * 0.8;
+      const floatX = Math.sin(time * floatSpeed + floatOffset.x * 10) * floatOffset.x * floatIntensity;
+      const floatY = Math.cos(time * floatSpeed * 1.3 + floatOffset.y * 10) * floatOffset.y * floatIntensity;
+      const floatZ = Math.sin(time * floatSpeed * 0.7 + floatOffset.z * 10) * floatOffset.z * floatIntensity;
+
+      fragment.position.x = baseX + floatX;
+      fragment.position.y = baseY + floatY;
+      fragment.position.z = baseZ + floatZ;
+
+      // Rotation: blend from scattered rotation to zero, with continuous spin that slows down
+      const spinIntensity = (1 - easedProgress) * 0.5;
+      fragment.rotation.x = lerp(scatteredRotation.x, 0, easedProgress) + time * rotationSpeed.x * spinIntensity;
+      fragment.rotation.y = lerp(scatteredRotation.y, 0, easedProgress) + time * rotationSpeed.y * spinIntensity;
+      fragment.rotation.z = lerp(scatteredRotation.z, 0, easedProgress) + time * rotationSpeed.z * spinIntensity;
+
+      // Subtle breathing scale when resolved (very subtle)
+      if (resolved > 0.9) {
+        const breathe = 1 + Math.sin(time * 1.5) * 0.02;
+        fragment.scale.setScalar(breathe);
+      }
     });
   });
 
