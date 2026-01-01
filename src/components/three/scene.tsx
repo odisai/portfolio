@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useRef, useMemo } from "react";
+import { Suspense, useRef, useMemo, useState, useEffect } from "react";
 import { Canvas } from "@react-three/fiber";
 import { Preload, Environment } from "@react-three/drei";
 import { EffectComposer, Bloom, ChromaticAberration, DepthOfField } from "@react-three/postprocessing";
@@ -49,8 +49,18 @@ function PostProcessing() {
 export function Scene({ children, className }: SceneProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const reducedMotion = useReducedMotion();
+  const [webglSupported, setWebglSupported] = useState<boolean | null>(null);
 
-  if (typeof window !== "undefined" && !isWebGL2Supported()) {
+  useEffect(() => {
+    setWebglSupported(isWebGL2Supported());
+  }, []);
+
+  // Show nothing during SSR/hydration to prevent mismatch
+  if (webglSupported === null) {
+    return <div className={cn("canvas-container", className)} />;
+  }
+
+  if (!webglSupported) {
     return (
       <div className={cn("webgl-fallback", className)}>
         <p className="text-white-muted">
