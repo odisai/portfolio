@@ -4,7 +4,7 @@ import { Suspense, useRef } from "react";
 import { Canvas } from "@react-three/fiber";
 import { Preload } from "@react-three/drei";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
-import { isWebGL2Supported } from "@/lib/utils";
+import { isWebGL2Supported, cn } from "@/lib/utils";
 
 interface SceneProps {
   children: React.ReactNode;
@@ -17,7 +17,7 @@ export function Scene({ children, className }: SceneProps) {
 
   if (typeof window !== "undefined" && !isWebGL2Supported()) {
     return (
-      <div className={\`webgl-fallback \${className}\`}>
+      <div className={cn("webgl-fallback", className)}>
         <p className="text-white-muted">
           WebGL not supported. Please use a modern browser.
         </p>
@@ -26,7 +26,7 @@ export function Scene({ children, className }: SceneProps) {
   }
 
   return (
-    <div ref={containerRef} className={\`canvas-container \${className}\`}>
+    <div ref={containerRef} className={cn("canvas-container", className)}>
       <Canvas
         gl={{
           antialias: true,
