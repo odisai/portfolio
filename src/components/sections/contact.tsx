@@ -1,8 +1,24 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useRef, useState, useMemo } from "react";
 import { motion, useInView } from "framer-motion";
 import { CONTENT } from "@/lib/constants";
+
+// Deterministic positions to avoid hydration mismatch
+const FRAGMENT_POSITIONS = [
+  { left: 15, top: 20, rotate: 12 },
+  { left: 75, top: 15, rotate: 35 },
+  { left: 25, top: 65, rotate: 8 },
+  { left: 85, top: 45, rotate: 42 },
+  { left: 45, top: 80, rotate: 22 },
+  { left: 60, top: 30, rotate: 5 },
+  { left: 10, top: 50, rotate: 38 },
+  { left: 90, top: 70, rotate: 15 },
+  { left: 35, top: 25, rotate: 28 },
+  { left: 70, top: 85, rotate: 40 },
+  { left: 55, top: 55, rotate: 18 },
+  { left: 20, top: 90, rotate: 33 },
+];
 
 export function Contact() {
   const sectionRef = useRef<HTMLElement>(null);
@@ -30,7 +46,7 @@ export function Contact() {
     >
       {/* Floating fragments constellation */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
-        {[...Array(12)].map((_, i) => (
+        {FRAGMENT_POSITIONS.map((pos, i) => (
           <motion.div
             key={i}
             initial={{ opacity: 0 }}
@@ -38,9 +54,9 @@ export function Contact() {
             transition={{ duration: 1, delay: i * 0.1 }}
             className="absolute w-4 h-4 bg-white/5 rounded-sm"
             style={{
-              left: `${10 + Math.random() * 80}%`,
-              top: `${10 + Math.random() * 80}%`,
-              transform: `rotate(${Math.random() * 45}deg)`,
+              left: `${pos.left}%`,
+              top: `${pos.top}%`,
+              transform: `rotate(${pos.rotate}deg)`,
             }}
           />
         ))}

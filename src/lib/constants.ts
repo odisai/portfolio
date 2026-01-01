@@ -45,18 +45,18 @@ export const SHADER = {
   COLORS: {
     // Darker searching state for more dramatic contrast
     SEARCHING: [0.08, 0.08, 0.1],
-    // Reduced brightness for better letter readability
-    RESOLVED: [0.92, 0.92, 0.95],
+    // Toned down for better letter readability (was 0.92)
+    RESOLVED: [0.75, 0.75, 0.8],
     // Vibrant iridescent colors
     IRIDESCENT_BLUE: [0.2, 0.6, 1.0],
     IRIDESCENT_PURPLE: [0.7, 0.3, 1.0],
   },
 
-  // Post-processing - optimized for crisp letter readability
-  BLOOM_INTENSITY: 0.25,
-  BLOOM_THRESHOLD: 0.85,
-  BLOOM_RADIUS: 0.35,
-  CHROMATIC_ABERRATION: 0.0003,
+  // Post-processing - minimal bloom for crisp letters
+  BLOOM_INTENSITY: 0.12,
+  BLOOM_THRESHOLD: 0.9,
+  BLOOM_RADIUS: 0.25,
+  CHROMATIC_ABERRATION: 0.0002,
 
   // Depth of Field settings
   DOF: {
@@ -66,13 +66,13 @@ export const SHADER = {
     HEIGHT: 480,
   },
 
-  // Lighting intensities (centralized control)
+  // Lighting intensities - reduced for clearer text
   LIGHTING: {
-    KEY_INTENSITY: 1.2,
-    FILL_INTENSITY: 0.6,
-    RIM_INTENSITY: 0.5,
-    ACCENT_INTENSITY: 0.4,
-    AMBIENT_INTENSITY: 0.4,
+    KEY_INTENSITY: 0.9,
+    FILL_INTENSITY: 0.4,
+    RIM_INTENSITY: 0.3,
+    ACCENT_INTENSITY: 0.25,
+    AMBIENT_INTENSITY: 0.35,
   },
 } as const;
 

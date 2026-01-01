@@ -207,26 +207,25 @@ const fragmentShaderCode = `
     vec3 searchingColor = uColorSearching + holoColor * 0.8;
     searchingColor += fresnel * holoColor * 0.5; // Extra rim iridescence
 
-    // Resolved state: bright with reduced iridescence for cleaner letter readability
+    // Resolved state: clean with minimal effects for text readability
     vec3 resolvedColor = uColorResolved;
-    resolvedColor += holoColor * mix(0.12, 0.18, uMorphProgress); // Reduced iridescence
-    resolvedColor += fresnel * 0.2; // Reduced rim glow for cleaner edges
+    resolvedColor += holoColor * mix(0.06, 0.1, uMorphProgress); // Minimal iridescence
+    resolvedColor += fresnel * 0.1; // Subtle rim for edge definition
 
     // Transition between states
     vec3 finalColor = mix(searchingColor, resolvedColor, uResolved);
 
     // === FINAL ENHANCEMENTS ===
 
-    // Add specular highlight (reduced intensity)
+    // Add specular highlight (very subtle)
     vec3 lightDir = normalize(vec3(1.0, 1.0, 1.0));
     vec3 halfDir = normalize(lightDir + viewDir);
     float specular = pow(max(dot(normal, halfDir), 0.0), 64.0);
-    finalColor += specular * 0.25 * (1.0 - uResolved * 0.6);
+    finalColor += specular * 0.12 * (1.0 - uResolved * 0.7);
 
-    // Edge enhancement - ACTIVE when morphed OR resolved for letter readability
-    // This is the key fix: edges stay defined in the resolved state
+    // Edge enhancement - subtle darkening at edges for definition
     float edgeFactor = max(uMorphProgress, uResolved);
-    float edgeBoost = edgeFactor * 0.1 * (1.0 - NdotV);
+    float edgeBoost = edgeFactor * 0.05 * (1.0 - NdotV);
     finalColor += edgeBoost;
 
     // === HOVER GLOW EFFECT ===
