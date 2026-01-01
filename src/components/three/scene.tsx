@@ -1,14 +1,42 @@
 "use client";
 
-import { Suspense, useRef } from "react";
+import { Suspense, useRef, useMemo } from "react";
 import { Canvas } from "@react-three/fiber";
-import { Preload } from "@react-three/drei";
+import { Preload, Environment } from "@react-three/drei";
+import { EffectComposer, Bloom, ChromaticAberration } from "@react-three/postprocessing";
+import { BlendFunction } from "postprocessing";
+import * as THREE from "three";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
 import { isWebGL2Supported, cn } from "@/lib/utils";
+import { SHADER } from "@/lib/constants";
 
 interface SceneProps {
   children: React.ReactNode;
   className?: string;
+}
+
+function PostProcessing() {
+  const offset = useMemo(
+    () => new THREE.Vector2(SHADER.CHROMATIC_ABERRATION, SHADER.CHROMATIC_ABERRATION),
+    []
+  );
+
+  return (
+    <EffectComposer>
+      <Bloom
+        intensity={SHADER.BLOOM_INTENSITY}
+        luminanceThreshold={SHADER.BLOOM_THRESHOLD}
+        luminanceSmoothing={0.9}
+        radius={0.8}
+      />
+      <ChromaticAberration
+        blendFunction={BlendFunction.NORMAL}
+        offset={offset}
+        radialModulation={false}
+        modulationOffset={0.5}
+      />
+    </EffectComposer>
+  );
 }
 
 export function Scene({ children, className }: SceneProps) {
@@ -36,17 +64,24 @@ export function Scene({ children, className }: SceneProps) {
           depth: true,
         }}
         camera={{
-          fov: 45,
+          fov: 50,
           near: 0.1,
           far: 1000,
-          position: [0, 0, 10],
+          position: [0, 0, 8],
         }}
         dpr={[1, 2]}
         performance={{ min: 0.5 }}
         frameloop={reducedMotion ? "demand" : "always"}
       >
         <Suspense fallback={null}>
+          {/* Environment lighting for reflections */}
+          <Environment preset="studio" environmentIntensity={0.5} />
+
           {children}
+
+          {/* Post-processing effects */}
+          {!reducedMotion && <PostProcessing />}
+
           <Preload all />
         </Suspense>
       </Canvas>
