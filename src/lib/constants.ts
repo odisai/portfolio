@@ -26,6 +26,14 @@ export const ANIMATION = {
     IN_OUT_EXPO: "cubic-bezier(0.87, 0, 0.13, 1)",
     SPRING: "cubic-bezier(0.34, 1.56, 0.64, 1)",
   },
+
+  // Spring physics parameters (for GSAP elastic easing)
+  SPRING: {
+    ASSEMBLY_ELASTICITY: 0.8,
+    ASSEMBLY_DAMPING: 0.4,
+    SETTLE_ELASTICITY: 1.2,
+    SETTLE_DAMPING: 0.6,
+  },
 } as const;
 
 // ═══════════════════════════════════════════════════════════════════
@@ -37,17 +45,35 @@ export const SHADER = {
   COLORS: {
     // Darker searching state for more dramatic contrast
     SEARCHING: [0.08, 0.08, 0.1],
-    // Bright resolved state
-    RESOLVED: [0.98, 0.98, 1.0],
+    // Reduced brightness for better letter readability
+    RESOLVED: [0.92, 0.92, 0.95],
     // Vibrant iridescent colors
     IRIDESCENT_BLUE: [0.2, 0.6, 1.0],
     IRIDESCENT_PURPLE: [0.7, 0.3, 1.0],
   },
 
-  // Post-processing - enhanced for cinematic look
-  BLOOM_INTENSITY: 1.2,
-  BLOOM_THRESHOLD: 0.3,
-  CHROMATIC_ABERRATION: 0.003,
+  // Post-processing - rebalanced for readability
+  BLOOM_INTENSITY: 0.5,
+  BLOOM_THRESHOLD: 0.7,
+  BLOOM_RADIUS: 0.6,
+  CHROMATIC_ABERRATION: 0.002,
+
+  // Depth of Field settings
+  DOF: {
+    FOCUS_DISTANCE: 0,
+    FOCAL_LENGTH: 0.02,
+    BOKEH_SCALE: 2,
+    HEIGHT: 480,
+  },
+
+  // Lighting intensities (centralized control)
+  LIGHTING: {
+    KEY_INTENSITY: 1.2,
+    FILL_INTENSITY: 0.6,
+    RIM_INTENSITY: 0.5,
+    ACCENT_INTENSITY: 0.4,
+    AMBIENT_INTENSITY: 0.4,
+  },
 } as const;
 
 // ═══════════════════════════════════════════════════════════════════
