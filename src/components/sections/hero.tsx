@@ -5,19 +5,32 @@ import { Scene } from "@/components/three/scene";
 import { FragmentAssembly } from "@/components/three/fragment-assembly";
 import { CameraController } from "@/components/three/camera-controller";
 import { AmbientParticles } from "@/components/three/ambient-particles";
-import { DescriptorText } from "@/components/ui/descriptor-text";
+import { HeroText } from "@/components/ui/hero-text";
 import { Navbar } from "@/components/ui/navbar";
 import { CONTENT, SHADER } from "@/lib/constants";
 
 export function Hero() {
   const [assemblyComplete, setAssemblyComplete] = useState(false);
   const [navVisible, setNavVisible] = useState(false);
+  const [hideBlobs, setHideBlobs] = useState(false);
 
-  // Show nav 300ms after assembly completes
+  // Fallback: show text after 4 seconds regardless
+  useEffect(() => {
+    const fallback = setTimeout(() => {
+      setAssemblyComplete(true);
+    }, 4000);
+    return () => clearTimeout(fallback);
+  }, []);
+
+  // Show nav 300ms after assembly completes, hide blobs shortly after
   useEffect(() => {
     if (assemblyComplete) {
-      const timer = setTimeout(() => setNavVisible(true), 300);
-      return () => clearTimeout(timer);
+      const navTimer = setTimeout(() => setNavVisible(true), 300);
+      const blobTimer = setTimeout(() => setHideBlobs(true), 500);
+      return () => {
+        clearTimeout(navTimer);
+        clearTimeout(blobTimer);
+      };
     }
   }, [assemblyComplete]);
 
@@ -70,18 +83,22 @@ export function Hero() {
         {/* Parallax Camera Controller */}
         <CameraController intensity={2.5} smoothness={0.06} idleDrift />
 
-        {/* Fragment Assembly Animation */}
-        <FragmentAssembly
-          autoPlay
-          autoPlayDelay={800}
-          onAssemblyComplete={() => setAssemblyComplete(true)}
-        />
+        {/* Fragment Assembly Animation - unmount after text appears */}
+        {!hideBlobs && (
+          <FragmentAssembly
+            autoPlay
+            autoPlayDelay={800}
+            onAssemblyComplete={() => setAssemblyComplete(true)}
+          />
+        )}
       </Scene>
+
+      {/* Crisp 2D Text - fades in as 3D blobs fade out */}
+      <HeroText visible={assemblyComplete} />
 
       {/* Content Layer */}
       <div className="container-portfolio relative z-10 pointer-events-none">
         {/* Descriptor Text - appears after assembly */}
-        <DescriptorText assemblyComplete={assemblyComplete} />
 
         {/* Location badge */}
         <div className="absolute left-8 bottom-8 text-[0.625rem] tracking-widest uppercase text-white/40">

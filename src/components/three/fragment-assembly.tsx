@@ -5,47 +5,36 @@ import { useThree, useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 import { Fragment } from "./fragment";
 import { useAssembly } from "./hooks/use-assembly";
-import { useTextGeometries } from "./hooks/use-text-geometries";
 import { useScrollEffects } from "./hooks/use-scroll-effects";
-import { createMorphableBlobPositions, TARGET_VERTEX_COUNT } from "./utils/geometry-utils";
 
-// Generate letter positions for "TAYLOR ALLEN"
-function generateLetterPositions() {
-  const firstName = "TAYLOR";
-  const lastName = "ALLEN";
-  const positions: Array<{ x: number; y: number; letter: string }> = [];
+// Generate positions for floating blobs (no longer tied to letters)
+function generateBlobPositions() {
+  const positions: Array<{ x: number; y: number }> = [];
+  const count = 11; // Same count as before for visual consistency
 
-  const letterSpacing = 0.9;
-  const rowSpacing = 1.4;
+  // Distribute blobs in a loose grid pattern
+  const cols = 6;
+  const rows = 2;
+  const spacingX = 0.85;
+  const spacingY = 1.2;
 
-  // First row: TAYLOR
-  const firstRowWidth = firstName.length * letterSpacing;
-  const firstRowOffset = -firstRowWidth / 2 + letterSpacing / 2;
+  for (let row = 0; row < rows; row++) {
+    const colsInRow = row === 0 ? 6 : 5;
+    const rowWidth = colsInRow * spacingX;
+    const rowOffset = -rowWidth / 2 + spacingX / 2;
 
-  firstName.split("").forEach((letter, i) => {
-    positions.push({
-      x: firstRowOffset + i * letterSpacing,
-      y: rowSpacing / 2,
-      letter,
-    });
-  });
-
-  // Second row: ALLEN
-  const secondRowWidth = lastName.length * letterSpacing;
-  const secondRowOffset = -secondRowWidth / 2 + letterSpacing / 2;
-
-  lastName.split("").forEach((letter, i) => {
-    positions.push({
-      x: secondRowOffset + i * letterSpacing,
-      y: -rowSpacing / 2,
-      letter,
-    });
-  });
+    for (let col = 0; col < colsInRow; col++) {
+      positions.push({
+        x: rowOffset + col * spacingX,
+        y: (rows / 2 - row - 0.5) * spacingY,
+      });
+    }
+  }
 
   return positions;
 }
 
-const LETTER_POSITIONS = generateLetterPositions();
+const BLOB_POSITIONS = generateBlobPositions();
 
 interface FragmentAssemblyProps {
   autoPlay?: boolean;
@@ -71,11 +60,14 @@ export function FragmentAssembly({
   const planeRef = useRef(new THREE.Plane(new THREE.Vector3(0, 0, 1), 0));
 
   // Mouse move handler
-  const handleMouseMove = useCallback((event: MouseEvent) => {
-    const rect = gl.domElement.getBoundingClientRect();
-    mouseRef.current.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
-    mouseRef.current.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
-  }, [gl.domElement]);
+  const handleMouseMove = useCallback(
+    (event: MouseEvent) => {
+      const rect = gl.domElement.getBoundingClientRect();
+      mouseRef.current.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+      mouseRef.current.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+    },
+    [gl.domElement]
+  );
 
   // Set up mouse tracking
   useEffect(() => {
@@ -87,7 +79,10 @@ export function FragmentAssembly({
   // Update cursor world position each frame
   useFrame(() => {
     raycasterRef.current.setFromCamera(mouseRef.current, camera);
-    raycasterRef.current.ray.intersectPlane(planeRef.current, cursorWorldPosRef.current);
+    raycasterRef.current.ray.intersectPlane(
+      planeRef.current,
+      cursorWorldPosRef.current
+    );
   });
 
   // Scroll effects for parallax depth
@@ -100,10 +95,7 @@ export function FragmentAssembly({
   // Apply scroll effects to group
   useFrame(() => {
     if (groupRef.current) {
-      // Apply scroll-based z offset for depth effect
       groupRef.current.position.z = scrollEffects.zOffset;
-
-      // Apply subtle scale reduction on scroll
       const scrollScale = scale * scrollEffects.scale;
       groupRef.current.scale.setScalar(scrollScale);
     }
@@ -116,48 +108,34 @@ export function FragmentAssembly({
     return Math.max(0.6, Math.min(1.5, baseScale * viewportScale));
   }, [viewport.width, viewport.height]);
 
-  // Extract just the letters for text geometry generation
-  const letters = useMemo(() => {
-    return LETTER_POSITIONS.map((pos) => pos.letter);
-  }, []);
-
-  // Load text geometries for morphing
-  const { letterPositions: textPositions, isLoaded: fontLoaded } = useTextGeometries(letters);
-
-  // Create target positions from letter positions
+  // Create target positions
   const targetPositions = useMemo(() => {
-    return LETTER_POSITIONS.map((pos) => new THREE.Vector3(pos.x, pos.y, 0));
-  }, []);
-
-  // Create blob positions with matching vertex count for each fragment
-  const blobPositionsArray = useMemo(() => {
-    const sizes = [0.32, 0.36, 0.34, 0.38, 0.33, 0.35, 0.37, 0.34, 0.36, 0.34, 0.32];
-
-    return LETTER_POSITIONS.map((_, i) => {
-      const size = sizes[i % sizes.length];
-      const seed = i * 1.5 + 0.5;
-      return createMorphableBlobPositions(TARGET_VERTEX_COUNT, size, seed);
-    });
+    return BLOB_POSITIONS.map((pos) => new THREE.Vector3(pos.x, pos.y, 0));
   }, []);
 
   // Seeds for each fragment's shader animation
   const seeds = useMemo(() => {
-    return LETTER_POSITIONS.map((_, i) => i * 1.7 + 0.3);
+    return BLOB_POSITIONS.map((_, i) => i * 1.7 + 0.3);
+  }, []);
+
+  // Blob sizes - varied for visual interest
+  const blobSizes = useMemo(() => {
+    return [0.32, 0.36, 0.34, 0.38, 0.33, 0.35, 0.37, 0.34, 0.36, 0.34, 0.32];
   }, []);
 
   // Initialize assembly hook
   const { fragments, triggerAssembly } = useAssembly({
     targetPositions,
     scatterRadius: 15,
-    assemblyDuration: 3.0,
-    staggerDelay: 0.06,
+    assemblyDuration: 2.5,
+    staggerDelay: 0.05,
     onAssemblyComplete,
     onAssemblyProgress,
   });
 
   // Auto-play assembly animation
   useEffect(() => {
-    if (autoPlay && !hasTriggeredRef.current && fontLoaded) {
+    if (autoPlay && !hasTriggeredRef.current) {
       hasTriggeredRef.current = true;
       const timeout = setTimeout(() => {
         triggerAssembly();
@@ -165,12 +143,7 @@ export function FragmentAssembly({
 
       return () => clearTimeout(timeout);
     }
-  }, [autoPlay, autoPlayDelay, triggerAssembly, fontLoaded]);
-
-  // Don't render until font is loaded
-  if (!fontLoaded || textPositions.length === 0) {
-    return null;
-  }
+  }, [autoPlay, autoPlayDelay, triggerAssembly]);
 
   return (
     <group ref={groupRef} scale={scale}>
@@ -178,9 +151,8 @@ export function FragmentAssembly({
         <Fragment
           key={i}
           state={fragmentState}
-          blobPositions={blobPositionsArray[i]}
-          letterPositions={textPositions[i]}
           seed={seeds[i]}
+          size={blobSizes[i % blobSizes.length]}
           cursorWorldPosition={cursorWorldPosRef.current}
           hoverRadius={2.5}
           scrollOpacity={scrollEffects.opacity}

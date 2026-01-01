@@ -15,8 +15,7 @@ export interface FragmentState {
   scatteredPosition: THREE.Vector3;
   scatteredRotation: THREE.Euler;
   progress: number;
-  resolved: number;
-  morphProgress: number; // 0 = blob, 1 = letter shape
+  fadeOut: number;
   // For floating animation
   floatOffset: THREE.Vector3;
   floatSpeed: number;
@@ -36,7 +35,7 @@ export function useAssembly({
   targetPositions,
   scatterRadius = 15,
   assemblyDuration = ANIMATION.ASSEMBLY_DURATION / 1000,
-  staggerDelay = 0.06,
+  staggerDelay = 0.05,
   onAssemblyComplete,
   onAssemblyProgress,
 }: UseAssemblyOptions) {
@@ -44,10 +43,10 @@ export function useAssembly({
   const isAssembledRef = useRef(false);
   const timeRef = useRef(0);
 
-  // Create fragment states with enhanced properties
+  // Create fragment states
   const fragments = useMemo<FragmentState[]>(() => {
-    return targetPositions.map((targetPosition, index) => {
-      // Random scattered position - distributed in a sphere around the scene
+    return targetPositions.map((targetPosition) => {
+      // Random scattered position
       const theta = random(0, Math.PI * 2);
       const phi = random(0, Math.PI);
       const r = random(scatterRadius * 0.6, scatterRadius);
@@ -55,7 +54,7 @@ export function useAssembly({
       const scatteredPosition = new THREE.Vector3(
         r * Math.sin(phi) * Math.cos(theta),
         r * Math.sin(phi) * Math.sin(theta),
-        r * Math.cos(phi) - 3 // Slightly behind camera
+        r * Math.cos(phi) - 3
       );
 
       const scatteredRotation = new THREE.Euler(
@@ -64,7 +63,6 @@ export function useAssembly({
         random(-Math.PI, Math.PI)
       );
 
-      // Floating animation parameters - each fragment floats uniquely
       const floatOffset = new THREE.Vector3(
         random(-1, 1),
         random(-1, 1),
@@ -87,8 +85,7 @@ export function useAssembly({
         scatteredPosition,
         scatteredRotation,
         progress: 0,
-        resolved: 0,
-        morphProgress: 0, // Start as blob
+        fadeOut: 0,
         floatOffset,
         floatSpeed,
         rotationSpeed,
@@ -111,80 +108,56 @@ export function useAssembly({
           fragments.reduce((sum, f) => sum + f.progress, 0) / fragments.length;
         onAssemblyProgress?.(totalProgress);
       },
-      onComplete: () => {
-        onAssemblyComplete?.();
-      },
     });
 
     fragments.forEach((fragment, i) => {
       const delay = i * staggerDelay;
 
-      // Pop-in scale animation (elastic)
-      tl.to(
-        fragment.scale,
-        {
-          x: 1,
-          y: 1,
-          z: 1,
-          duration: 0.6,
-          ease: "elastic.out(1, 0.5)",
-        },
-        delay * 0.5 // Stagger the pop-in
-      );
-
-      // Movement to target position with spring overshoot
+      // Movement to target position
       tl.to(
         fragment,
         {
           progress: 1,
           duration: assemblyDuration,
-          ease: `elastic.out(${ANIMATION.SPRING.ASSEMBLY_ELASTICITY}, ${ANIMATION.SPRING.ASSEMBLY_DAMPING})`,
+          ease: "power3.out",
         },
-        delay + 0.3 // Start moving after pop-in begins
+        delay
       );
+    });
 
-      // Morph from blob to letter (starts 30% into movement, overlaps)
+    // Trigger assembly complete when blobs reach positions (before fade)
+    const completionTime = fragments.length * staggerDelay + assemblyDuration * 0.7;
+    tl.call(() => {
+      onAssemblyComplete?.();
+    }, [], completionTime);
+
+    // Fade out all blobs quickly after they reach positions  
+    const fadeOutDelay = fragments.length * staggerDelay + assemblyDuration * 0.3;
+
+    fragments.forEach((fragment, i) => {
       tl.to(
         fragment,
         {
-          morphProgress: 1,
-          duration: assemblyDuration * 0.8,
-          ease: "power2.inOut", // Smooth morph
+          fadeOut: 1,
+          duration: 0.5,
+          ease: "power3.in",
         },
-        delay + assemblyDuration * 0.3 // Start morphing 30% into movement
-      );
-
-      // Color transition to resolved state (after morph is mostly done)
-      tl.to(
-        fragment,
-        {
-          resolved: 1,
-          duration: assemblyDuration * 0.5,
-          ease: "power2.out",
-        },
-        delay + assemblyDuration * 0.6
-      );
-
-      // Settle animation - bouncy final placement
-      tl.to(
-        fragment.scale,
-        {
-          x: 1,
-          y: 1,
-          z: 1,
-          duration: 0.4,
-          ease: `elastic.out(${ANIMATION.SPRING.SETTLE_ELASTICITY}, ${ANIMATION.SPRING.SETTLE_DAMPING})`,
-        },
-        delay + assemblyDuration * 0.9
+        fadeOutDelay + i * 0.01
       );
     });
 
     timelineRef.current = tl;
     return tl;
-  }, [fragments, assemblyDuration, staggerDelay, onAssemblyComplete, onAssemblyProgress]);
+  }, [
+    fragments,
+    assemblyDuration,
+    staggerDelay,
+    onAssemblyComplete,
+    onAssemblyProgress,
+  ]);
 
   // Update fragment transforms each frame
-  useFrame((state, delta) => {
+  useFrame((_, delta) => {
     timeRef.current += delta;
     const time = timeRef.current;
 
@@ -197,36 +170,50 @@ export function useAssembly({
         floatOffset,
         floatSpeed,
         rotationSpeed,
-        resolved
       } = fragment;
 
-      // Smooth easing for position interpolation
+      // Smooth easing
       const easedProgress = progress * progress * (3 - 2 * progress);
 
-      // Calculate base position (lerp between scattered and target)
+      // Position interpolation
       const baseX = lerp(scatteredPosition.x, targetPosition.x, easedProgress);
       const baseY = lerp(scatteredPosition.y, targetPosition.y, easedProgress);
       const baseZ = lerp(scatteredPosition.z, targetPosition.z, easedProgress);
 
-      // Add floating motion (reduces as progress increases)
+      // Floating motion (reduces as progress increases)
       const floatIntensity = (1 - easedProgress) * 0.8;
-      const floatX = Math.sin(time * floatSpeed + floatOffset.x * 10) * floatOffset.x * floatIntensity;
-      const floatY = Math.cos(time * floatSpeed * 1.3 + floatOffset.y * 10) * floatOffset.y * floatIntensity;
-      const floatZ = Math.sin(time * floatSpeed * 0.7 + floatOffset.z * 10) * floatOffset.z * floatIntensity;
+      const floatX =
+        Math.sin(time * floatSpeed + floatOffset.x * 10) *
+        floatOffset.x *
+        floatIntensity;
+      const floatY =
+        Math.cos(time * floatSpeed * 1.3 + floatOffset.y * 10) *
+        floatOffset.y *
+        floatIntensity;
+      const floatZ =
+        Math.sin(time * floatSpeed * 0.7 + floatOffset.z * 10) *
+        floatOffset.z *
+        floatIntensity;
 
       fragment.position.x = baseX + floatX;
       fragment.position.y = baseY + floatY;
       fragment.position.z = baseZ + floatZ;
 
-      // Rotation: blend from scattered rotation to zero, with continuous spin that slows down
+      // Rotation slows down as it approaches target
       const spinIntensity = (1 - easedProgress) * 0.5;
-      fragment.rotation.x = lerp(scatteredRotation.x, 0, easedProgress) + time * rotationSpeed.x * spinIntensity;
-      fragment.rotation.y = lerp(scatteredRotation.y, 0, easedProgress) + time * rotationSpeed.y * spinIntensity;
-      fragment.rotation.z = lerp(scatteredRotation.z, 0, easedProgress) + time * rotationSpeed.z * spinIntensity;
+      fragment.rotation.x =
+        lerp(scatteredRotation.x, 0, easedProgress) +
+        time * rotationSpeed.x * spinIntensity;
+      fragment.rotation.y =
+        lerp(scatteredRotation.y, 0, easedProgress) +
+        time * rotationSpeed.y * spinIntensity;
+      fragment.rotation.z =
+        lerp(scatteredRotation.z, 0, easedProgress) +
+        time * rotationSpeed.z * spinIntensity;
 
-      // Subtle breathing scale when resolved (very subtle)
-      if (resolved > 0.9) {
-        const breathe = 1 + Math.sin(time * 1.5) * 0.02;
+      // Gentle breathing when settled
+      if (progress > 0.9) {
+        const breathe = 1 + Math.sin(time * 1.5) * 0.015;
         fragment.scale.setScalar(breathe);
       }
     });

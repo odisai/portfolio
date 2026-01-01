@@ -30,7 +30,7 @@ export function Navbar({ visible, className }: NavbarProps) {
         href="#"
         className="text-white/90 text-sm font-medium tracking-wide hover:text-white transition-colors pointer-events-auto"
       >
-        Taylor Allen
+        TA
       </a>
 
       {/* Nav Links */}

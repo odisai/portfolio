@@ -8,23 +8,18 @@ import { SHADER } from "@/lib/constants";
 
 interface FragmentProps {
   state: FragmentState;
-  blobPositions: Float32Array;
-  letterPositions: Float32Array;
   seed?: number;
+  size?: number;
   cursorWorldPosition?: THREE.Vector3;
   hoverRadius?: number;
   scrollOpacity?: number;
 }
 
-// Premium iridescent/holographic vertex shader with morph support
+// Organic blob vertex shader
 const vertexShader = `
   uniform float uTime;
-  uniform float uResolved;
-  uniform float uMorphProgress;
   uniform float uSeed;
   uniform float uHoverIntensity;
-
-  attribute vec3 morphTarget;
 
   varying vec3 vNormal;
   varying vec3 vViewPosition;
@@ -102,38 +97,26 @@ const vertexShader = `
   void main() {
     vUv = uv;
 
-    // Morph between blob and letter positions
-    vec3 morphedPosition = mix(position, morphTarget, uMorphProgress);
+    // Multi-octave noise for organic blob deformation
+    float noise1 = snoise(position * 2.0 + uTime * 0.5 + uSeed);
+    float noise2 = snoise(position * 4.0 - uTime * 0.3 + uSeed * 2.0) * 0.5;
+    float noise3 = snoise(position * 8.0 + uTime * 0.2 + uSeed * 3.0) * 0.25;
 
-    // Organic blob deformation - smoothly disabled as morph completes AND when resolved
-    // Using smoothstep for clean transition, fully disabled when resolved for crisp letters
-    float morphFade = 1.0 - smoothstep(0.7, 1.0, uMorphProgress);
-    float deformAmount = 0.25 * morphFade * (1.0 - uResolved);
+    float totalNoise = (noise1 + noise2 + noise3) * 0.2;
 
-    // Multi-octave noise for organic feel
-    float noise1 = snoise(morphedPosition * 2.0 + uTime * 0.5 + uSeed);
-    float noise2 = snoise(morphedPosition * 4.0 - uTime * 0.3 + uSeed * 2.0) * 0.5;
-    float noise3 = snoise(morphedPosition * 8.0 + uTime * 0.2 + uSeed * 3.0) * 0.25;
+    // Breathing/pulsing effect
+    float breathe = sin(uTime * 1.5 + uSeed) * 0.04;
 
-    float totalNoise = (noise1 + noise2 + noise3) * deformAmount;
+    // Hover wobble effect
+    float hoverWobble = uHoverIntensity * sin(uTime * 8.0 + position.x * 5.0) * 0.03;
+    float hoverLift = uHoverIntensity * 0.08;
 
-    // Breathing/pulsing effect - disabled when morphed or resolved for stable letters
-    float breathe = sin(uTime * 1.5 + uSeed) * 0.03 * (1.0 - uMorphProgress) * (1.0 - uResolved);
-
-    // Hover wobble effect - adds subtle oscillation when cursor is near
-    float hoverWobble = uHoverIntensity * sin(uTime * 8.0 + morphedPosition.x * 5.0) * 0.02;
-    float hoverLift = uHoverIntensity * 0.05; // Slight z-push toward camera
-
-    // Calculate normal - blend between blob normal (radial) and geometry normal
-    vec3 blobNormal = normalize(position);
-    vec3 blendedNormal = mix(blobNormal, normal, uMorphProgress);
-
-    // Displaced position with hover effects
-    vec3 displaced = morphedPosition + blendedNormal * (totalNoise + breathe + hoverWobble);
+    // Displaced position
+    vec3 displaced = position + normal * (totalNoise + breathe + hoverWobble);
     displaced.z += hoverLift;
 
     vDisplacement = totalNoise;
-    vNormal = normalize(normalMatrix * blendedNormal);
+    vNormal = normalize(normalMatrix * normal);
     vHoverIntensity = uHoverIntensity;
 
     vec4 mvPosition = modelViewMatrix * vec4(displaced, 1.0);
@@ -144,15 +127,12 @@ const vertexShader = `
   }
 `;
 
-// Premium iridescent/holographic fragment shader with morph awareness
+// Iridescent/holographic fragment shader
 const fragmentShaderCode = `
   uniform float uTime;
-  uniform float uResolved;
-  uniform float uMorphProgress;
   uniform float uSeed;
   uniform float uScrollOpacity;
-  uniform vec3 uColorSearching;
-  uniform vec3 uColorResolved;
+  uniform float uFadeOut;
   uniform vec3 uIridescentBlue;
   uniform vec3 uIridescentPurple;
 
@@ -171,8 +151,6 @@ const fragmentShaderCode = `
     float NdotV = max(dot(normal, viewDir), 0.0);
     float fresnel = pow(1.0 - NdotV, 3.0);
 
-    // === IRIDESCENT/HOLOGRAPHIC EFFECT ===
-
     // Thin-film interference simulation
     float iridescenceFactor = fresnel + vDisplacement * 2.0;
 
@@ -186,7 +164,7 @@ const fragmentShaderCode = `
       sin(iridescenceFactor * 6.28 + timeShift + 4.18) * 0.5 + 0.5
     );
 
-    // Add position-based variation for gradient across surface
+    // Position-based gradient
     float posGradient = vWorldPosition.y * 0.3 + vWorldPosition.x * 0.2;
     vec3 gradientIridescence = vec3(
       sin(posGradient + timeShift * 0.5) * 0.5 + 0.5,
@@ -194,60 +172,65 @@ const fragmentShaderCode = `
       sin(posGradient + timeShift * 0.5 + 4.18) * 0.5 + 0.5
     );
 
-    // Blend different iridescence layers
+    // Blend iridescence layers
     vec3 holoColor = mix(iridescence, gradientIridescence, 0.4);
 
-    // Add blue-purple base tint
+    // Blue-purple base tint
     vec3 baseTint = mix(uIridescentBlue, uIridescentPurple, fresnel + sin(timeShift) * 0.3);
     holoColor = mix(baseTint, holoColor, 0.7);
 
-    // === SEARCHING VS RESOLVED STATES ===
+    // Dark base with strong iridescence
+    vec3 baseColor = vec3(0.08, 0.08, 0.1);
+    vec3 finalColor = baseColor + holoColor * 0.8;
+    finalColor += fresnel * holoColor * 0.5;
 
-    // Searching state: dark base + strong iridescence
-    vec3 searchingColor = uColorSearching + holoColor * 0.8;
-    searchingColor += fresnel * holoColor * 0.5; // Extra rim iridescence
-
-    // Resolved state: clean with minimal effects for text readability
-    vec3 resolvedColor = uColorResolved;
-    resolvedColor += holoColor * mix(0.06, 0.1, uMorphProgress); // Minimal iridescence
-    resolvedColor += fresnel * 0.1; // Subtle rim for edge definition
-
-    // Transition between states
-    vec3 finalColor = mix(searchingColor, resolvedColor, uResolved);
-
-    // === FINAL ENHANCEMENTS ===
-
-    // Add specular highlight (very subtle)
+    // Specular highlight
     vec3 lightDir = normalize(vec3(1.0, 1.0, 1.0));
     vec3 halfDir = normalize(lightDir + viewDir);
     float specular = pow(max(dot(normal, halfDir), 0.0), 64.0);
-    finalColor += specular * 0.12 * (1.0 - uResolved * 0.7);
+    finalColor += specular * 0.15;
 
-    // Edge enhancement - subtle darkening at edges for definition
-    float edgeFactor = max(uMorphProgress, uResolved);
-    float edgeBoost = edgeFactor * 0.05 * (1.0 - NdotV);
-    finalColor += edgeBoost;
-
-    // === HOVER GLOW EFFECT ===
-    // Add warm glow and increased iridescence on hover (reduced intensity)
-    vec3 hoverGlow = vec3(1.0, 0.95, 0.9) * vHoverIntensity * 0.25;
-    vec3 hoverIridescence = holoColor * vHoverIntensity * 0.2;
+    // Hover glow
+    vec3 hoverGlow = vec3(1.0, 0.95, 0.9) * vHoverIntensity * 0.3;
+    vec3 hoverIridescence = holoColor * vHoverIntensity * 0.25;
     finalColor += hoverGlow + hoverIridescence;
 
-    // REMOVED: finalColor *= 1.1 - this was causing overbright/washout
-
-    // Apply scroll-based opacity fade
-    float finalOpacity = uScrollOpacity;
+    // Apply fade out
+    float finalOpacity = uScrollOpacity * (1.0 - uFadeOut);
 
     gl_FragColor = vec4(finalColor, finalOpacity);
   }
 `;
 
+// Create organic blob geometry
+function createBlobGeometry(size: number, seed: number): THREE.SphereGeometry {
+  const geometry = new THREE.SphereGeometry(size, 32, 32);
+  const positions = geometry.attributes.position.array as Float32Array;
+
+  // Apply organic noise displacement to sphere
+  for (let i = 0; i < positions.length; i += 3) {
+    const x = positions[i];
+    const y = positions[i + 1];
+    const z = positions[i + 2];
+
+    const noise1 = Math.sin(x * 3 + seed) * Math.cos(y * 3 + seed) * 0.15;
+    const noise2 = Math.sin(x * 5 + z * 5 + seed * 2) * 0.08;
+    const noise3 = Math.cos(y * 7 + z * 4 + seed * 3) * 0.05;
+    const displacement = 1 + noise1 + noise2 + noise3;
+
+    positions[i] *= displacement;
+    positions[i + 1] *= displacement;
+    positions[i + 2] *= displacement;
+  }
+
+  geometry.computeVertexNormals();
+  return geometry;
+}
+
 export function Fragment({
   state,
-  blobPositions,
-  letterPositions,
   seed = 0,
+  size = 0.35,
   cursorWorldPosition,
   hoverRadius = 2,
   scrollOpacity = 1,
@@ -256,89 +239,25 @@ export function Fragment({
   const materialRef = useRef<THREE.ShaderMaterial>(null);
   const hoverIntensityRef = useRef(0);
 
-  // Create geometry with morph target attribute
-  const morphGeometry = useMemo(() => {
-    const geometry = new THREE.BufferGeometry();
-
-    // Set blob positions as base geometry
-    geometry.setAttribute(
-      "position",
-      new THREE.BufferAttribute(blobPositions, 3)
-    );
-
-    // Set letter positions as morph target
-    geometry.setAttribute(
-      "morphTarget",
-      new THREE.BufferAttribute(letterPositions, 3)
-    );
-
-    // Compute normals for the blob (radial from center)
-    const count = blobPositions.length / 3;
-    const normals = new Float32Array(count * 3);
-    for (let i = 0; i < count; i++) {
-      const x = blobPositions[i * 3];
-      const y = blobPositions[i * 3 + 1];
-      const z = blobPositions[i * 3 + 2];
-      const len = Math.sqrt(x * x + y * y + z * z);
-      if (len > 0) {
-        normals[i * 3] = x / len;
-        normals[i * 3 + 1] = y / len;
-        normals[i * 3 + 2] = z / len;
-      }
-    }
-    geometry.setAttribute("normal", new THREE.BufferAttribute(normals, 3));
-
-    // Create UV coordinates (spherical projection)
-    const uvs = new Float32Array(count * 2);
-    for (let i = 0; i < count; i++) {
-      const x = blobPositions[i * 3];
-      const y = blobPositions[i * 3 + 1];
-      const z = blobPositions[i * 3 + 2];
-      uvs[i * 2] = 0.5 + Math.atan2(z, x) / (2 * Math.PI);
-      uvs[i * 2 + 1] = 0.5 + Math.asin(y / Math.sqrt(x * x + y * y + z * z)) / Math.PI;
-    }
-    geometry.setAttribute("uv", new THREE.BufferAttribute(uvs, 2));
-
-    // Create triangle indices for rendering
-    // Using golden spiral neighbor approximation
-    const indices: number[] = [];
-    const width = Math.ceil(Math.sqrt(count));
-    const height = Math.ceil(count / width);
-
-    for (let row = 0; row < height - 1; row++) {
-      for (let col = 0; col < width - 1; col++) {
-        const i0 = row * width + col;
-        const i1 = i0 + 1;
-        const i2 = i0 + width;
-        const i3 = i2 + 1;
-
-        if (i0 < count && i1 < count && i2 < count) {
-          indices.push(i0, i1, i2);
-        }
-        if (i1 < count && i3 < count && i2 < count) {
-          indices.push(i1, i3, i2);
-        }
-      }
-    }
-
-    geometry.setIndex(indices);
-
-    return geometry;
-  }, [blobPositions, letterPositions]);
+  // Create blob geometry
+  const geometry = useMemo(() => {
+    return createBlobGeometry(size, seed);
+  }, [size, seed]);
 
   const shaderMaterial = useMemo(() => {
     return new THREE.ShaderMaterial({
       uniforms: {
         uTime: { value: 0 },
-        uResolved: { value: 0 },
-        uMorphProgress: { value: 0 },
         uHoverIntensity: { value: 0 },
         uScrollOpacity: { value: 1 },
+        uFadeOut: { value: 0 },
         uSeed: { value: seed },
-        uColorSearching: { value: new THREE.Vector3(...SHADER.COLORS.SEARCHING) },
-        uColorResolved: { value: new THREE.Vector3(...SHADER.COLORS.RESOLVED) },
-        uIridescentBlue: { value: new THREE.Vector3(...SHADER.COLORS.IRIDESCENT_BLUE) },
-        uIridescentPurple: { value: new THREE.Vector3(...SHADER.COLORS.IRIDESCENT_PURPLE) },
+        uIridescentBlue: {
+          value: new THREE.Vector3(...SHADER.COLORS.IRIDESCENT_BLUE),
+        },
+        uIridescentPurple: {
+          value: new THREE.Vector3(...SHADER.COLORS.IRIDESCENT_PURPLE),
+        },
       },
       vertexShader,
       fragmentShader: fragmentShaderCode,
@@ -357,27 +276,28 @@ export function Fragment({
     // Calculate hover intensity based on cursor distance
     if (cursorWorldPosition && materialRef.current) {
       const distance = state.position.distanceTo(cursorWorldPosition);
-      const targetIntensity = distance < hoverRadius
-        ? Math.pow(1 - distance / hoverRadius, 2) // Quadratic falloff
-        : 0;
+      const targetIntensity =
+        distance < hoverRadius
+          ? Math.pow(1 - distance / hoverRadius, 2)
+          : 0;
 
-      // Smooth interpolation for fluid hover response
-      hoverIntensityRef.current += (targetIntensity - hoverIntensityRef.current) * 0.15;
+      hoverIntensityRef.current +=
+        (targetIntensity - hoverIntensityRef.current) * 0.15;
     } else {
-      hoverIntensityRef.current *= 0.9; // Decay when no cursor
+      hoverIntensityRef.current *= 0.9;
     }
 
     if (materialRef.current) {
       materialRef.current.uniforms.uTime.value = clock.getElapsedTime();
-      materialRef.current.uniforms.uResolved.value = state.resolved;
-      materialRef.current.uniforms.uMorphProgress.value = state.morphProgress;
-      materialRef.current.uniforms.uHoverIntensity.value = hoverIntensityRef.current;
+      materialRef.current.uniforms.uHoverIntensity.value =
+        hoverIntensityRef.current;
       materialRef.current.uniforms.uScrollOpacity.value = scrollOpacity;
+      materialRef.current.uniforms.uFadeOut.value = state.fadeOut;
     }
   });
 
   return (
-    <mesh ref={meshRef} geometry={morphGeometry}>
+    <mesh ref={meshRef} geometry={geometry}>
       <primitive object={shaderMaterial} ref={materialRef} attach="material" />
     </mesh>
   );
