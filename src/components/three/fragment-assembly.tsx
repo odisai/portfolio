@@ -204,16 +204,20 @@ export function FragmentAssembly({
   }, [fragments]);
 
   // Auto-play assembly animation
+  // Store triggerAssembly in a ref to avoid effect re-runs when callback reference changes
+  const triggerAssemblyRef = useRef(triggerAssembly);
+  triggerAssemblyRef.current = triggerAssembly;
+
   useEffect(() => {
     if (autoPlay && !hasTriggeredRef.current) {
-      hasTriggeredRef.current = true;
       const timeout = setTimeout(() => {
-        triggerAssembly();
+        hasTriggeredRef.current = true;
+        triggerAssemblyRef.current();
       }, autoPlayDelay);
 
       return () => clearTimeout(timeout);
     }
-  }, [autoPlay, autoPlayDelay, triggerAssembly]);
+  }, [autoPlay, autoPlayDelay]);
 
   return (
     <group ref={groupRef} scale={scale}>

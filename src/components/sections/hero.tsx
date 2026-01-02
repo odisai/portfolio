@@ -8,6 +8,7 @@ import { AmbientParticles } from "@/components/three/ambient-particles";
 import { Navbar } from "@/components/ui/navbar";
 import { FallbackText } from "@/components/ui/fallback-text";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
+import { useParallaxText } from "@/hooks/useParallaxText";
 import { CONTENT, SHADER } from "@/lib/constants";
 
 export function Hero() {
@@ -19,6 +20,14 @@ export function Hero() {
 
   // Accessibility: respect reduced motion preference
   const reducedMotion = useReducedMotion();
+
+  // Parallax 3D effect for descriptor text
+  const parallaxText = useParallaxText({
+    intensity: 15,
+    smoothness: 0.08,
+    maxRotation: 5,
+    enabled: !reducedMotion && morphComplete,
+  });
 
   // Font loading timeout: show fallback if fonts don't load in 5s
   useEffect(() => {
@@ -123,25 +132,27 @@ export function Hero() {
       <div className="container-portfolio relative z-10 pointer-events-none">
         {/* Descriptor Text - appears after morph completes (only if not using fallback) */}
         {morphComplete && !showFallback && (
-          <div className="absolute left-1/2 top-1/2 -translate-x-1/2 translate-y-20 text-center">
-            <p className="text-sm tracking-[0.15em] uppercase text-white/50 animate-fade-in">
-              {CONTENT.DESCRIPTORS.join(" • ")}
+          <div
+            className="absolute left-1/2 top-1/2 translate-y-26 text-center"
+            style={{
+              transform: `translate(-50%, calc(50% + 2.5rem)) ${parallaxText.transform}`,
+              transformStyle: "preserve-3d",
+              perspective: "1000px",
+            }}
+          >
+            <p className="text-[0.9rem] tracking-[0.2em] text-white/60 animate-fade-in font-extralight">
+              {CONTENT.DESCRIPTOR}
             </p>
           </div>
         )}
-
-        {/* Location badge */}
-        <div className="absolute left-8 bottom-8 text-[0.625rem] tracking-widest uppercase text-white/40">
-          {CONTENT.LOCATION}
-        </div>
       </div>
 
       {/* Scroll indicator - positioned relative to section */}
-      <div className="absolute left-1/2 -translate-x-1/2 bottom-8 flex flex-col items-center gap-2 z-10 pointer-events-none">
+      <div className="absolute left-1/2 -translate-x-1/2 -bottom-2 flex flex-col items-center gap-2 z-10 pointer-events-none">
         <span className="text-[0.5rem] tracking-[0.25em] uppercase text-white/30">
           Scroll
         </span>
-        <div className="w-px h-12 bg-gradient-to-b from-white/20 to-transparent" />
+        <div className="w-px h-12 bg-linear-to-b from-white/20 to-transparent" />
       </div>
     </section>
   );

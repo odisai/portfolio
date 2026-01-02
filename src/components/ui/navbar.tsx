@@ -25,13 +25,19 @@ export function Navbar({ visible, className }: NavbarProps) {
         transitionTimingFunction: "cubic-bezier(0.16, 1, 0.3, 1)",
       }}
     >
-      {/* Logo / Name */}
-      <a
-        href="#"
-        className="text-white/90 text-sm font-medium tracking-wide hover:text-white transition-colors pointer-events-auto"
-      >
-        TA
-      </a>
+      {/* Logo / Name + Location */}
+      <div className="flex items-center gap-6">
+        <a
+          href="#"
+          className="text-white/90 text-sm font-medium tracking-wide hover:text-white transition-colors pointer-events-auto"
+        >
+          TA
+        </a>
+        <div className="h-3 w-px bg-white/20" />
+        <span className="text-[0.625rem] tracking-widest uppercase text-white/40">
+          {CONTENT.LOCATION}
+        </span>
+      </div>
 
       {/* Nav Links */}
       <div className="flex items-center gap-8">
