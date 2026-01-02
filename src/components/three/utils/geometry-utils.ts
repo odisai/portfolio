@@ -2,9 +2,9 @@ import * as THREE from "three";
 
 /**
  * Target vertex count for morphing - higher count = crisper letters
- * Increased from 2,562 to 8,000 for better letter definition
+ * Reduced from 8,000 to 4,000 for lighter visual density
  */
-export const TARGET_VERTEX_COUNT = 8000;
+export const TARGET_VERTEX_COUNT = 4000;
 
 /**
  * Linear interpolation

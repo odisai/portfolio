@@ -149,10 +149,10 @@ export function Hero() {
 
       {/* Scroll indicator - positioned relative to section */}
       <div className="absolute left-1/2 -translate-x-1/2 -bottom-2 flex flex-col items-center gap-2 z-10 pointer-events-none">
-        <span className="text-[0.5rem] tracking-[0.25em] uppercase text-white/30">
+        <span className="text-[0.5rem] tracking-[0.25em] uppercase text-white/40">
           Scroll
         </span>
-        <div className="w-px h-12 bg-linear-to-b from-white/20 to-transparent" />
+        <div className="w-px h-12 bg-linear-to-b from-white/40 to-transparent" />
       </div>
     </section>
   );

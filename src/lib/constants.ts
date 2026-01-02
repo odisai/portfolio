@@ -61,6 +61,9 @@ export const SHADER = {
     IRIDESCENT_PURPLE: [0.7, 0.3, 1.0],
   },
 
+  // Base opacity for fragments (0-1, lower = more transparent)
+  BASE_OPACITY: 0.7,
+
   // Post-processing - minimal bloom for crisp letters
   BLOOM_INTENSITY: 0.12,
   BLOOM_THRESHOLD: 0.9,
@@ -125,8 +128,8 @@ export const CONTENT = {
   TAGLINE: "Creating technology that matters",
   LOCATION: "Bay Area, CA",
   
-  // Word rotation for hero
-  DESCRIPTORS: ["Builder", "Architect", "Founder"],
+  // Descriptor for hero
+  DESCRIPTOR: "Innovator. Builder. Architect.",
   
   // Social links
   LINKS: {

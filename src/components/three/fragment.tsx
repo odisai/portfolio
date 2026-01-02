@@ -153,6 +153,7 @@ const fragmentShaderCode = `
   uniform float uFadeOut;
   uniform float uMorphProgress;
   uniform float uResolved;
+  uniform float uBaseOpacity;
   uniform vec3 uIridescentBlue;
   uniform vec3 uIridescentPurple;
 
@@ -220,8 +221,8 @@ const fragmentShaderCode = `
     vec3 hoverIridescence = holoColor * vHoverIntensity * 0.25;
     finalColor += hoverGlow + hoverIridescence;
 
-    // Apply fade out
-    float finalOpacity = uScrollOpacity * (1.0 - uFadeOut);
+    // Apply fade out and base opacity
+    float finalOpacity = uBaseOpacity * uScrollOpacity * (1.0 - uFadeOut);
 
     gl_FragColor = vec4(finalColor, finalOpacity);
   }
@@ -299,6 +300,7 @@ export function Fragment({
         uIridescentPurple: {
           value: new THREE.Vector3(...SHADER.COLORS.IRIDESCENT_PURPLE),
         },
+        uBaseOpacity: { value: SHADER.BASE_OPACITY },
       },
       vertexShader,
       fragmentShader: fragmentShaderCode,
