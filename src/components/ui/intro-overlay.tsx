@@ -17,7 +17,6 @@ export type IntroPhase =
   | "complete"; // Intro finished
 
 export function IntroOverlay({ onIntroComplete, onPhaseChange }: IntroOverlayProps) {
-  const [phase, setPhase] = useState<IntroPhase>("void");
   const [isVisible, setIsVisible] = useState(true);
   const overlayRef = useRef<HTMLDivElement>(null);
   const orbRef = useRef<HTMLDivElement>(null);
@@ -25,7 +24,6 @@ export function IntroOverlay({ onIntroComplete, onPhaseChange }: IntroOverlayPro
   const timelineRef = useRef<gsap.core.Timeline | null>(null);
 
   const updatePhase = useCallback((newPhase: IntroPhase) => {
-    setPhase(newPhase);
     onPhaseChange?.(newPhase);
   }, [onPhaseChange]);
 

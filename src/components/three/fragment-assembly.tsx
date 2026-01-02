@@ -122,17 +122,41 @@ export function FragmentAssembly({
     smoothness: 0.06,
   });
 
+  // Calculate responsive scale
+  const scale = useMemo(() => {
+    const baseScale = 1.2;
+    const viewportScale = Math.min(viewport.width / 10, viewport.height / 6);
+    return Math.max(0.6, Math.min(1.5, baseScale * viewportScale));
+  }, [viewport.width, viewport.height]);
+
+  // Create target positions for letter layout
+  const targetPositions = useMemo(() => {
+    return LETTER_POSITIONS.map((pos) => new THREE.Vector3(pos.x, pos.y, 0));
+  }, []);
+
+  // Initialize assembly hook with accessibility adjustments
+  const { fragments, triggerAssembly } = useAssembly({
+    targetPositions,
+    scatterRadius: reducedMotion ? 0 : 15, // No scatter for reduced motion
+    assemblyDuration: reducedMotion ? 0 : 2.5, // Instant assembly
+    staggerDelay: reducedMotion ? 0 : 0.05, // No stagger
+    reducedMotion, // Pass to hook for initial state
+    onAssemblyComplete,
+    onMorphComplete,
+    onAssemblyProgress,
+  });
+
   // Apply scroll effects to group and individual letter spread
   useFrame(() => {
     if (groupRef.current) {
-      groupRef.current.position.z = scrollEffects.zOffset;
-      const scrollScale = scale * scrollEffects.scale;
+      groupRef.current.position.z = scrollEffects.current.zOffset;
+      const scrollScale = scale * scrollEffects.current.scale;
       groupRef.current.scale.setScalar(scrollScale);
     }
 
     // Apply horizontal spread to letters based on scroll progress
     // Letters spread outward from center as user scrolls
-    const spreadAmount = scrollEffects.spread || 0;
+    const spreadAmount = scrollEffects.current.spread || 0;
     if (spreadAmount > 0) {
       fragments.forEach((fragment, i) => {
         const letterPos = LETTER_POSITIONS[i];
@@ -149,18 +173,6 @@ export function FragmentAssembly({
     }
   });
 
-  // Calculate responsive scale
-  const scale = useMemo(() => {
-    const baseScale = 1.2;
-    const viewportScale = Math.min(viewport.width / 10, viewport.height / 6);
-    return Math.max(0.6, Math.min(1.5, baseScale * viewportScale));
-  }, [viewport.width, viewport.height]);
-
-  // Create target positions for letter layout
-  const targetPositions = useMemo(() => {
-    return LETTER_POSITIONS.map((pos) => new THREE.Vector3(pos.x, pos.y, 0));
-  }, []);
-
   // Seeds for each fragment's shader animation
   const seeds = useMemo(() => {
     return LETTERS.map((_, i) => i * 1.7 + 0.3);
@@ -171,18 +183,6 @@ export function FragmentAssembly({
     return [0.32, 0.36, 0.34, 0.38, 0.33, 0.35, 0.37, 0.34, 0.36, 0.34, 0.32];
   }, []);
 
-  // Initialize assembly hook with accessibility adjustments
-  const { fragments, triggerAssembly } = useAssembly({
-    targetPositions,
-    scatterRadius: reducedMotion ? 0 : 15, // No scatter for reduced motion
-    assemblyDuration: reducedMotion ? 0 : 2.5, // Instant assembly
-    staggerDelay: reducedMotion ? 0 : 0.05, // No stagger
-    reducedMotion, // Pass to hook for initial state
-    onAssemblyComplete,
-    onMorphComplete,
-    onAssemblyProgress,
-  });
-
   // For reduced motion: immediately trigger completion callbacks
   useEffect(() => {
     if (reducedMotion && fontsLoaded) {
@@ -192,21 +192,27 @@ export function FragmentAssembly({
   }, [reducedMotion, fontsLoaded, onMorphComplete]);
 
   // Handle letter click - trigger spin animation
-  const handleLetterClick = useCallback((index: number) => {
-    const fragment = fragments[index];
+  const handleLetterClick = useCallback(
+    (index: number) => {
+      const fragment = fragments[index];
 
-    // Spin animation: 360° rotation on Y-axis
-    gsap.to(fragment.rotation, {
-      y: fragment.rotation.y + Math.PI * 2,
-      duration: 0.8,
-      ease: "elastic.out(1, 0.5)",
-    });
-  }, [fragments]);
+      // Spin animation: 360° rotation on Y-axis
+      gsap.to(fragment.rotation, {
+        y: fragment.rotation.y + Math.PI * 2,
+        duration: 0.8,
+        ease: "elastic.out(1, 0.5)",
+      });
+    },
+    [fragments]
+  );
 
   // Auto-play assembly animation
   // Store triggerAssembly in a ref to avoid effect re-runs when callback reference changes
   const triggerAssemblyRef = useRef(triggerAssembly);
-  triggerAssemblyRef.current = triggerAssembly;
+
+  useEffect(() => {
+    triggerAssemblyRef.current = triggerAssembly;
+  });
 
   useEffect(() => {
     if (autoPlay && !hasTriggeredRef.current) {
@@ -219,22 +225,28 @@ export function FragmentAssembly({
     }
   }, [autoPlay, autoPlayDelay]);
 
+  // Pre-build fragment elements to work around compiler strictness with Three.js mutable objects
+  const fragmentElements = [];
+  for (let i = 0; i < LETTERS.length; i++) {
+    fragmentElements.push(
+      <Fragment
+        key={i}
+        state={fragments[i]}
+        seed={seeds[i]}
+        size={blobSizes[i % blobSizes.length]}
+        letterPositions={fontsLoaded ? letterPositions[i] : undefined}
+        cursorWorldPosition={cursorWorldPosRef.current}
+        hoverRadius={2.5}
+        scrollOpacity={scrollEffects.current.opacity}
+        zCompression={scrollEffects.current.zCompression}
+        onClick={() => handleLetterClick(i)}
+      />
+    );
+  }
+
   return (
     <group ref={groupRef} scale={scale}>
-      {fragments.map((fragmentState, i) => (
-        <Fragment
-          key={i}
-          state={fragmentState}
-          seed={seeds[i]}
-          size={blobSizes[i % blobSizes.length]}
-          letterPositions={fontsLoaded ? letterPositions[i] : undefined}
-          cursorWorldPosition={cursorWorldPosRef.current}
-          hoverRadius={2.5}
-          scrollOpacity={scrollEffects.opacity}
-          zCompression={scrollEffects.zCompression}
-          onClick={() => handleLetterClick(i)}
-        />
-      ))}
+      {fragmentElements}
     </group>
   );
 }

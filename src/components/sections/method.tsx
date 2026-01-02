@@ -83,8 +83,8 @@ interface EmphasisMapping {
 
 const statements: Statement[] = [
   {
-    text: "I've shipped systems at 10M+ scale. The same rigor works at 10 users. Complexity doesn't scare me. Unclear requirements do. Scope. Build. Ship. Iterate.",
-    emphasis: ["shipped systems", "10M+ scale", "10 users", "Unclear requirements", "Scope", "Build", "Ship", "Iterate"],
+    text: "I've shipped systems at 10M+ scale. The same rigor works at 10 users. Complexity doesn't scare me. Unclear requirements do. Scope. Shipx. Iterate.",
+    emphasis: ["shipped systems", "10M+ scale", "10 users", "Unclear requirements", "Scope", "Ship", "Iterate"],
   },
 ];
 
@@ -160,19 +160,7 @@ function RevealWord({
   threshold,
   scrollProgress,
 }: RevealWordProps) {
-  // Non-emphasis words stay at 40% opacity
-  if (!isEmphasis) {
-    return (
-      <span
-        className="inline-block mr-[0.25em]"
-        style={{ color: "rgba(255, 255, 255, 0.4)" }}
-      >
-        {word}
-      </span>
-    );
-  }
-
-  // Emphasis words reveal based on scroll threshold
+  // Always call hooks unconditionally at the top
   const transitionWidth = 0.05; // Smooth transition window
 
   // Calculate progress for both color and glow
@@ -210,6 +198,19 @@ function RevealWord({
     ([blue, purple, white]) => `${blue}, ${purple}, ${white}`
   );
 
+  // Non-emphasis words stay at 40% opacity (render decision after hooks)
+  if (!isEmphasis) {
+    return (
+      <span
+        className="inline-block mr-[0.25em]"
+        style={{ color: "rgba(255, 255, 255, 0.4)" }}
+      >
+        {word}
+      </span>
+    );
+  }
+
+  // Emphasis words reveal based on scroll threshold
   return (
     <motion.span
       className="inline-block mr-[0.25em] relative"

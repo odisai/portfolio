@@ -2,7 +2,6 @@
 
 import { useRef, useEffect, useCallback } from "react";
 import { useFrame, useThree } from "@react-three/fiber";
-import * as THREE from "three";
 
 interface UseParallaxCameraOptions {
   intensity?: number; // How much the camera moves (degrees)
@@ -25,16 +24,17 @@ export function useParallaxCamera({
   const mouseRef = useRef({ x: 0.5, y: 0.5 });
   const targetRotationRef = useRef({ x: 0, y: 0 });
   const currentRotationRef = useRef({ x: 0, y: 0 });
-  const lastActivityRef = useRef(Date.now());
+  const lastActivityRef = useRef(0);
   const isIdleRef = useRef(false);
   const baseRotationRef = useRef({ x: 0, y: 0 });
 
-  // Store initial camera rotation
+  // Store initial camera rotation and initialize activity timestamp
   useEffect(() => {
     baseRotationRef.current = {
       x: camera.rotation.x,
       y: camera.rotation.y,
     };
+    lastActivityRef.current = Date.now();
   }, [camera]);
 
   // Mouse move handler
@@ -90,13 +90,17 @@ export function useParallaxCamera({
     currentRotationRef.current.x += (targetRotationRef.current.x - currentRotationRef.current.x) * smoothness;
     currentRotationRef.current.y += (targetRotationRef.current.y - currentRotationRef.current.y) * smoothness;
 
-    // Apply to camera
-    camera.rotation.x = currentRotationRef.current.x;
-    camera.rotation.y = currentRotationRef.current.y;
+    // Apply to camera using .set() method (Three.js mutation pattern)
+    camera.rotation.set(
+      currentRotationRef.current.x,
+      currentRotationRef.current.y,
+      camera.rotation.z
+    );
   });
 
+  // Return refs themselves, not .current (to avoid accessing refs during render)
   return {
-    mousePosition: mouseRef.current,
-    isIdle: isIdleRef.current,
+    mousePosition: mouseRef,
+    isIdle: isIdleRef,
   };
 }

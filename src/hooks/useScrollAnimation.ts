@@ -30,16 +30,28 @@ export function useScrollAnimation(
     offset: options?.offset ?? ["start end", "end start"],
   });
 
+  // Always call hooks unconditionally - use default values when options not provided
+  const y = useTransform(
+    scrollYProgress,
+    [0, 1],
+    options?.parallaxY ?? ["0px", "0px"]
+  );
+
+  const opacity = useTransform(
+    scrollYProgress,
+    [0, 0.2, 0.8, 1],
+    options?.opacity ?? [1, 1, 1, 1]
+  );
+
   const result: ScrollAnimationReturn = { scrollYProgress };
 
-  // Add parallax Y transformation if configured
+  // Only include transformed values in result if options were provided
   if (options?.parallaxY) {
-    result.y = useTransform(scrollYProgress, [0, 1], options.parallaxY);
+    result.y = y;
   }
 
-  // Add opacity transformation if configured
   if (options?.opacity) {
-    result.opacity = useTransform(scrollYProgress, [0, 0.2, 0.8, 1], options.opacity);
+    result.opacity = opacity;
   }
 
   return result;

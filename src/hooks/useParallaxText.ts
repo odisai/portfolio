@@ -44,7 +44,8 @@ export function useParallaxText({
 
   useEffect(() => {
     if (!enabled) {
-      setTransform({ x: 0, y: 0, rotateX: 0, rotateY: 0 });
+      // Reset target ref - animation will naturally transition to zero
+      targetRef.current = { x: 0, y: 0, rotateX: 0, rotateY: 0 };
       return;
     }
 

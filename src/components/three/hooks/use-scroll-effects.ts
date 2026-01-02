@@ -34,7 +34,7 @@ export function useScrollEffects({
   smoothness = 0.08,
   zCompressionEnabled = true,
   zCompressionAmount = 0.3,
-}: UseScrollEffectsOptions = {}): ScrollEffects {
+}: UseScrollEffectsOptions = {}) {
   const scrollRef = useRef(0);
   const targetRef = useRef(0);
   const effectsRef = useRef<ScrollEffects>({
@@ -87,5 +87,5 @@ export function useScrollEffects({
     };
   });
 
-  return effectsRef.current;
+  return effectsRef;
 }

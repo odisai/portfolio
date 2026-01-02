@@ -41,14 +41,6 @@ export function Hero() {
     return () => clearTimeout(timeout);
   }, [fontsLoaded, fontError]);
 
-  // Show fallback immediately on font error
-  useEffect(() => {
-    if (fontError) {
-      console.error("Font loading failed - showing fallback text");
-      setShowFallback(true);
-      setMorphComplete(true);
-    }
-  }, [fontError]);
 
   // Show nav 300ms after morph completes
   useEffect(() => {
@@ -120,7 +112,12 @@ export function Hero() {
             onAssemblyComplete={() => {/* Assembly complete */}}
             onMorphComplete={() => setMorphComplete(true)}
             onFontsLoaded={setFontsLoaded}
-            onFontError={() => setFontError(true)}
+            onFontError={() => {
+              console.error("Font loading failed - showing fallback text");
+              setFontError(true);
+              setShowFallback(true);
+              setMorphComplete(true);
+            }}
           />
         )}
       </Scene>
