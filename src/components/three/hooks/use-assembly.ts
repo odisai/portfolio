@@ -16,6 +16,7 @@ export interface FragmentState {
   scatteredRotation: THREE.Euler;
   progress: number;
   fadeOut: number;
+  morphProgress: number; // 0 = blob, 1 = letter
   // For floating animation
   floatOffset: THREE.Vector3;
   floatSpeed: number;
@@ -27,7 +28,9 @@ interface UseAssemblyOptions {
   scatterRadius?: number;
   assemblyDuration?: number;
   staggerDelay?: number;
+  reducedMotion?: boolean;
   onAssemblyComplete?: () => void;
+  onMorphComplete?: () => void;
   onAssemblyProgress?: (progress: number) => void;
 }
 
@@ -36,7 +39,9 @@ export function useAssembly({
   scatterRadius = 15,
   assemblyDuration = ANIMATION.ASSEMBLY_DURATION / 1000,
   staggerDelay = 0.05,
+  reducedMotion = false,
   onAssemblyComplete,
+  onMorphComplete,
   onAssemblyProgress,
 }: UseAssemblyOptions) {
   const timelineRef = useRef<gsap.core.Timeline | null>(null);
@@ -84,14 +89,15 @@ export function useAssembly({
         targetPosition: targetPosition.clone(),
         scatteredPosition,
         scatteredRotation,
-        progress: 0,
+        progress: reducedMotion ? 1 : 0, // Skip animation for reduced motion
         fadeOut: 0,
+        morphProgress: reducedMotion ? 1 : 0, // Start as letter for reduced motion
         floatOffset,
         floatSpeed,
         rotationSpeed,
       };
     });
-  }, [targetPositions, scatterRadius]);
+  }, [targetPositions, scatterRadius, reducedMotion]);
 
   // Trigger assembly animation
   const triggerAssembly = useCallback(() => {
@@ -125,26 +131,33 @@ export function useAssembly({
       );
     });
 
-    // Trigger assembly complete when blobs reach positions (before fade)
-    const completionTime = fragments.length * staggerDelay + assemblyDuration * 0.7;
-    tl.call(() => {
-      onAssemblyComplete?.();
-    }, [], completionTime);
+    // Start morphing after all fragments reach their positions
+    // Movement completes at: (fragments.length * staggerDelay) + assemblyDuration
+    const morphStartTime = fragments.length * staggerDelay + assemblyDuration;
 
-    // Fade out all blobs quickly after they reach positions  
-    const fadeOutDelay = fragments.length * staggerDelay + assemblyDuration * 0.3;
-
-    fragments.forEach((fragment, i) => {
+    // Morph all fragments simultaneously from blob to letter
+    fragments.forEach((fragment) => {
       tl.to(
         fragment,
         {
-          fadeOut: 1,
-          duration: 0.5,
-          ease: "power3.in",
+          morphProgress: 1,
+          duration: 1.9, // 1.9 second morph duration
+          ease: "power2.inOut",
         },
-        fadeOutDelay + i * 0.01
+        morphStartTime
       );
     });
+
+    // Trigger assembly complete when blobs reach positions (before morph)
+    tl.call(() => {
+      onAssemblyComplete?.();
+    }, [], morphStartTime);
+
+    // Trigger morph complete when morphing finishes
+    const morphCompleteTime = morphStartTime + 1.9;
+    tl.call(() => {
+      onMorphComplete?.();
+    }, [], morphCompleteTime);
 
     timelineRef.current = tl;
     return tl;
@@ -153,6 +166,7 @@ export function useAssembly({
     assemblyDuration,
     staggerDelay,
     onAssemblyComplete,
+    onMorphComplete,
     onAssemblyProgress,
   ]);
 

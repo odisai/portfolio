@@ -11,9 +11,9 @@ export default function Home() {
     <SmoothScroll>
       <main>
         <Hero />
+        <Method />
         <CurrentBuild />
         <Archive />
-        <Method />
         <Credentials />
         <Contact />
       </main>

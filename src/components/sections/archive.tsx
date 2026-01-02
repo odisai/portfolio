@@ -255,7 +255,7 @@ export function Archive() {
           transition={{ duration: 0.8 }}
           className="text-2xl md:text-3xl font-light text-white/60 italic"
         >
-          "Building is a practice."
+          &ldquo;Building is a practice.&rdquo;
         </motion.p>
       </div>
     </section>

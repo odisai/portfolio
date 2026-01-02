@@ -3,6 +3,15 @@
 // ═══════════════════════════════════════════════════════════════════
 
 export const ANIMATION = {
+  // Intro sequence
+  INTRO: {
+    VOID_DURATION: 400,
+    GENESIS_DURATION: 800,
+    BURST_DURATION: 800,
+    FADE_DURATION: 400,
+    TOTAL_DURATION: 3200, // Total intro time before assembly starts
+  },
+
   // Assembly animation
   ASSEMBLY_DURATION: 2500,
   ASSEMBLY_DURATION_MOBILE: 2000,
@@ -66,12 +75,12 @@ export const SHADER = {
     HEIGHT: 480,
   },
 
-  // Lighting intensities - reduced for clearer text
+  // Lighting intensities - optimized for 3D letter readability
   LIGHTING: {
-    KEY_INTENSITY: 0.9,
+    KEY_INTENSITY: 1.1, // Increased for crisp letter definition
     FILL_INTENSITY: 0.4,
     RIM_INTENSITY: 0.3,
-    ACCENT_INTENSITY: 0.25,
+    ACCENT_INTENSITY: 0.15, // Reduced purple for better clarity
     AMBIENT_INTENSITY: 0.35,
   },
 } as const;

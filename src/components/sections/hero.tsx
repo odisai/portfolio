@@ -5,34 +5,49 @@ import { Scene } from "@/components/three/scene";
 import { FragmentAssembly } from "@/components/three/fragment-assembly";
 import { CameraController } from "@/components/three/camera-controller";
 import { AmbientParticles } from "@/components/three/ambient-particles";
-import { HeroText } from "@/components/ui/hero-text";
 import { Navbar } from "@/components/ui/navbar";
+import { FallbackText } from "@/components/ui/fallback-text";
+import { useReducedMotion } from "@/hooks/useReducedMotion";
 import { CONTENT, SHADER } from "@/lib/constants";
 
 export function Hero() {
-  const [assemblyComplete, setAssemblyComplete] = useState(false);
+  const [morphComplete, setMorphComplete] = useState(false);
   const [navVisible, setNavVisible] = useState(false);
-  const [hideBlobs, setHideBlobs] = useState(false);
+  const [fontsLoaded, setFontsLoaded] = useState(false);
+  const [fontError, setFontError] = useState(false);
+  const [showFallback, setShowFallback] = useState(false);
 
-  // Fallback: show text after 4 seconds regardless
-  useEffect(() => {
-    const fallback = setTimeout(() => {
-      setAssemblyComplete(true);
-    }, 4000);
-    return () => clearTimeout(fallback);
-  }, []);
+  // Accessibility: respect reduced motion preference
+  const reducedMotion = useReducedMotion();
 
-  // Show nav 300ms after assembly completes, hide blobs shortly after
+  // Font loading timeout: show fallback if fonts don't load in 5s
   useEffect(() => {
-    if (assemblyComplete) {
-      const navTimer = setTimeout(() => setNavVisible(true), 300);
-      const blobTimer = setTimeout(() => setHideBlobs(true), 500);
-      return () => {
-        clearTimeout(navTimer);
-        clearTimeout(blobTimer);
-      };
+    const timeout = setTimeout(() => {
+      if (!fontsLoaded && !fontError) {
+        console.warn("Font loading timeout - showing fallback text");
+        setShowFallback(true);
+        setMorphComplete(true);
+      }
+    }, 5000);
+    return () => clearTimeout(timeout);
+  }, [fontsLoaded, fontError]);
+
+  // Show fallback immediately on font error
+  useEffect(() => {
+    if (fontError) {
+      console.error("Font loading failed - showing fallback text");
+      setShowFallback(true);
+      setMorphComplete(true);
     }
-  }, [assemblyComplete]);
+  }, [fontError]);
+
+  // Show nav 300ms after morph completes
+  useEffect(() => {
+    if (morphComplete) {
+      const navTimer = setTimeout(() => setNavVisible(true), 300);
+      return () => clearTimeout(navTimer);
+    }
+  }, [morphComplete]);
 
   return (
     <section className="section-hero relative">
@@ -80,25 +95,40 @@ export function Hero() {
         {/* Ambient Particle Field - minimal */}
         <AmbientParticles count={80} opacity={0.25} speed={0.08} />
 
-        {/* Parallax Camera Controller */}
-        <CameraController intensity={2.5} smoothness={0.06} idleDrift />
+        {/* Parallax Camera Controller - disabled for reduced motion */}
+        <CameraController
+          enabled={!reducedMotion}
+          intensity={2.5}
+          smoothness={0.06}
+          idleDrift={!reducedMotion}
+        />
 
-        {/* Fragment Assembly Animation - unmount after text appears */}
-        {!hideBlobs && (
+        {/* Fragment Assembly - 3D letters persist throughout */}
+        {!showFallback && (
           <FragmentAssembly
             autoPlay
             autoPlayDelay={800}
-            onAssemblyComplete={() => setAssemblyComplete(true)}
+            onAssemblyComplete={() => console.log("\n\n\nassembly complete\n\n\n")}
+            onMorphComplete={() => setMorphComplete(true)}
+            onFontsLoaded={setFontsLoaded}
+            onFontError={() => setFontError(true)}
           />
         )}
       </Scene>
 
-      {/* Crisp 2D Text - fades in as 3D blobs fade out */}
-      <HeroText visible={assemblyComplete} />
+      {/* Fallback 2D Text - shown if fonts fail to load */}
+      <FallbackText visible={showFallback} />
 
       {/* Content Layer */}
       <div className="container-portfolio relative z-10 pointer-events-none">
-        {/* Descriptor Text - appears after assembly */}
+        {/* Descriptor Text - appears after morph completes (only if not using fallback) */}
+        {morphComplete && !showFallback && (
+          <div className="absolute left-1/2 top-1/2 -translate-x-1/2 translate-y-20 text-center">
+            <p className="text-sm tracking-[0.15em] uppercase text-white/50 animate-fade-in">
+              {CONTENT.DESCRIPTORS.join(" • ")}
+            </p>
+          </div>
+        )}
 
         {/* Location badge */}
         <div className="absolute left-8 bottom-8 text-[0.625rem] tracking-widest uppercase text-white/40">

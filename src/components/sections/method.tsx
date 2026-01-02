@@ -26,7 +26,7 @@ interface AnimatedWordProps {
   totalWords: number;
 }
 
-function AnimatedWord({ word, isEmphasis, index, totalWords }: AnimatedWordProps) {
+function AnimatedWord({ word, isEmphasis, index }: AnimatedWordProps) {
   return (
     <motion.span
       initial={{ opacity: 0, y: 20 }}

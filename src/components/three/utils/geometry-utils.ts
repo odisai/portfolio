@@ -83,9 +83,9 @@ export function createMorphableBlobPositions(
     const azimuth = angleIncrement * i;
 
     // Base spherical coordinates
-    let x = Math.sin(inclination) * Math.cos(azimuth);
-    let y = Math.sin(inclination) * Math.sin(azimuth);
-    let z = Math.cos(inclination);
+    const x = Math.sin(inclination) * Math.cos(azimuth);
+    const y = Math.sin(inclination) * Math.sin(azimuth);
+    const z = Math.cos(inclination);
 
     // Apply organic noise displacement for blob look
     const noise1 = Math.sin(x * 3 + seed) * Math.cos(y * 3 + seed) * 0.15;
