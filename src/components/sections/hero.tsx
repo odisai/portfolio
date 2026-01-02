@@ -117,7 +117,7 @@ export function Hero() {
           <FragmentAssembly
             autoPlay
             autoPlayDelay={800}
-            onAssemblyComplete={() => console.log("\n\n\nassembly complete\n\n\n")}
+            onAssemblyComplete={() => {/* Assembly complete */}}
             onMorphComplete={() => setMorphComplete(true)}
             onFontsLoaded={setFontsLoaded}
             onFontError={() => setFontError(true)}

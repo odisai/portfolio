@@ -1,8 +1,11 @@
 "use client";
 
-import { useRef, useState } from "react";
-import { motion, useInView } from "framer-motion";
+import { useState } from "react";
+import { motion } from "framer-motion";
 import { CONTENT } from "@/lib/constants";
+import { SectionLabel } from "@/components/ui/section-label";
+import { Footer } from "@/components/layout/footer";
+import { useSectionInView } from "@/hooks/useSectionInView";
 
 // Deterministic positions to avoid hydration mismatch
 const FRAGMENT_POSITIONS = [
@@ -21,27 +24,44 @@ const FRAGMENT_POSITIONS = [
 ];
 
 export function Contact() {
-  const sectionRef = useRef<HTMLElement>(null);
-  const isInView = useInView(sectionRef, { once: true, margin: "-100px" });
+  const { ref, isInView } = useSectionInView();
   const [email, setEmail] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [error, setError] = useState("");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email) return;
 
     setIsSubmitting(true);
-    // Simulate submission - replace with actual form handler
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-    setIsSubmitting(false);
-    setIsSubmitted(true);
-    setEmail("");
+    setError("");
+
+    try {
+      const response = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to submit");
+      }
+
+      setIsSubmitted(true);
+      setEmail("");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "An error occurred");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
     <section
-      ref={sectionRef}
+      ref={ref}
       className="relative min-h-screen py-32 bg-[#0A0A0B] flex flex-col"
     >
       {/* Floating fragments constellation */}
@@ -63,17 +83,7 @@ export function Contact() {
       </div>
 
       <div className="container-portfolio relative z-10 flex-1 flex flex-col justify-center">
-        {/* Section label */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={isInView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.6 }}
-          className="mb-12"
-        >
-          <span className="text-[0.625rem] tracking-[0.3em] uppercase text-white/40">
-            Open Channel
-          </span>
-        </motion.div>
+        <SectionLabel>Open Channel</SectionLabel>
 
         {/* Main CTA */}
         <motion.div
@@ -105,23 +115,28 @@ export function Contact() {
               <p className="text-green-400">Thanks! I&apos;ll be in touch soon.</p>
             </div>
           ) : (
-            <form onSubmit={handleSubmit} className="flex gap-3">
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="your@email.com"
-                className="flex-1 px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white placeholder:text-white/30 focus:outline-none focus:border-white/30 transition-colors"
-                required
-              />
-              <button
-                type="submit"
-                disabled={isSubmitting}
-                className="px-6 py-3 bg-white text-black text-sm font-medium rounded-lg hover:bg-white/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {isSubmitting ? "..." : "Send"}
-              </button>
-            </form>
+            <>
+              <form onSubmit={handleSubmit} className="flex gap-3">
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="your@email.com"
+                  className="flex-1 px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white placeholder:text-white/30 focus:outline-none focus:border-white/30 transition-colors"
+                  required
+                />
+                <button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="px-6 py-3 bg-white text-black text-sm font-medium rounded-lg hover:bg-white/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {isSubmitting ? "..." : "Send"}
+                </button>
+              </form>
+              {error && (
+                <p className="mt-3 text-sm text-red-400">{error}</p>
+              )}
+            </>
           )}
         </motion.div>
 
@@ -171,37 +186,7 @@ export function Contact() {
         </motion.div>
       </div>
 
-      {/* Footer */}
-      <footer className="container-portfolio py-8 border-t border-white/5">
-        <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-          {/* Marquee name */}
-          <div className="overflow-hidden w-48">
-            <motion.div
-              animate={{ x: [0, -100] }}
-              transition={{
-                duration: 10,
-                repeat: Infinity,
-                ease: "linear",
-              }}
-              className="flex gap-8 whitespace-nowrap"
-            >
-              <span className="text-xs text-white/20">{CONTENT.NAME}</span>
-              <span className="text-xs text-white/20">{CONTENT.NAME}</span>
-              <span className="text-xs text-white/20">{CONTENT.NAME}</span>
-            </motion.div>
-          </div>
-
-          {/* Copyright */}
-          <p className="text-xs text-white/20">
-            © {new Date().getFullYear()} {CONTENT.NAME}. All rights reserved.
-          </p>
-
-          {/* Built with */}
-          <p className="text-xs text-white/20">
-            Built with Next.js, Three.js & GLSL
-          </p>
-        </div>
-      </footer>
+      <Footer />
     </section>
   );
 }

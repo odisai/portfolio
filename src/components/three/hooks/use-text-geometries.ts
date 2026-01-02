@@ -4,6 +4,7 @@ import { useMemo, useState, useEffect } from "react";
 import { TextGeometry } from "three/examples/jsm/geometries/TextGeometry.js";
 import { FontLoader, Font } from "three/examples/jsm/loaders/FontLoader.js";
 import { normalizeGeometry, TARGET_VERTEX_COUNT } from "../utils/geometry-utils";
+import { logger } from "@/lib/logger";
 
 interface TextGeometriesResult {
   letterPositions: Float32Array[];
@@ -31,7 +32,7 @@ export function useTextGeometries(
       },
       undefined,
       (err) => {
-        console.error("Failed to load font:", err);
+        logger.error("Failed to load font", err);
         setError(err instanceof Error ? err : new Error("Failed to load font"));
       }
     );
@@ -68,7 +69,7 @@ export function useTextGeometries(
         // Clean up the text geometry
         textGeo.dispose();
       } catch (err) {
-        console.error(`Failed to create geometry for letter "${letter}":`, err);
+        logger.error(`Failed to create geometry for letter "${letter}"`, err);
         // Create empty positions as fallback
         letterPositions.push(new Float32Array(targetVertexCount * 3));
       }
