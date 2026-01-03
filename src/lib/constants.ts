@@ -86,6 +86,23 @@ export const SHADER = {
     ACCENT_INTENSITY: 0.15, // Reduced purple for better clarity
     AMBIENT_INTENSITY: 0.35,
   },
+
+  // Atmospheric effects
+  ATMOSPHERIC: {
+    // Gradient orbs
+    ORB_COUNT: 3,
+    ORB_BASE_OPACITY: 0.35,
+    ORB_DRIFT_SPEED: 0.12,
+
+    // Text glow
+    GLOW_MAX_INTENSITY: 0.6,
+    GLOW_SCROLL_SCALE_MAX: 1.4,
+
+    // Film grain
+    GRAIN_BASE_OPACITY: 0.035,
+    GRAIN_INTENSITY: 0.7,
+    GRAIN_ANIMATION_FPS: 10,
+  },
 } as const;
 
 // ═══════════════════════════════════════════════════════════════════

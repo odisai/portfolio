@@ -83,8 +83,8 @@ interface EmphasisMapping {
 
 const statements: Statement[] = [
   {
-    text: "I've shipped systems at 10M+ scale. The same rigor works at 10 users. Complexity doesn't scare me. Unclear requirements do. Scope. Shipx. Iterate.",
-    emphasis: ["shipped systems", "10M+ scale", "10 users", "Unclear requirements", "Scope", "Ship", "Iterate"],
+    text: "I've shipped systems at 100M+ request scale. The same rigor works at 10 users. Complexity doesn't scare me. Scope. Ship. Iterate.",
+    emphasis: ["shipped systems", "100M+ request scale", "10 users", "Scope", "Ship", "Iterate"],
   },
 ];
 
@@ -99,9 +99,6 @@ const SCROLL_HEIGHT_MULTIPLIER = 3.5;
 function isWordEmphasis(word: string, emphasisList: string[]): boolean {
   const cleanWord = word.toLowerCase().replace(/[.,—]/g, "");
 
-  // Skip very short words to avoid false matches (e.g., "I" matching "architect")
-  if (cleanWord.length < 3) return false;
-
   return emphasisList.some((em) => {
     const cleanEm = em.toLowerCase();
 
@@ -111,8 +108,10 @@ function isWordEmphasis(word: string, emphasisList: string[]): boolean {
     // Check if any individual word in the emphasis phrase matches
     const emphasisWords = cleanEm.split(" ");
     return emphasisWords.some((emphWord) => {
-      // Require substantial match (at least 3 chars)
-      if (emphWord.length < 3) return cleanWord === emphWord;
+      // Exact match for short words (like "10")
+      if (emphWord.length < 3 || cleanWord.length < 3) {
+        return cleanWord === emphWord;
+      }
       return cleanWord.includes(emphWord) || emphWord.includes(cleanWord);
     });
   });
