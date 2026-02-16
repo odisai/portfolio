@@ -1,156 +1,271 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { Scene } from "@/components/three/scene";
-import { FragmentAssembly } from "@/components/three/fragment-assembly";
-import { CameraController } from "@/components/three/camera-controller";
-import { AmbientParticles } from "@/components/three/ambient-particles";
+import { useState, useEffect, useRef } from "react";
+import { motion, useMotionValue, useSpring, useTransform } from "framer-motion";
 import { Navbar } from "@/components/ui/navbar";
-import { FallbackText } from "@/components/ui/fallback-text";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
-import { useParallaxText } from "@/hooks/useParallaxText";
-import { CONTENT, SHADER } from "@/lib/constants";
+import { HyperText } from "@/components/ui/hyper-text";
+import { Spotlight } from "@/components/ui/spotlight";
 
 export function Hero() {
-  const [morphComplete, setMorphComplete] = useState(false);
-  const [navVisible, setNavVisible] = useState(false);
-  const [fontsLoaded, setFontsLoaded] = useState(false);
-  const [fontError, setFontError] = useState(false);
-  const [showFallback, setShowFallback] = useState(false);
-
-  // Accessibility: respect reduced motion preference
+  const [phase, setPhase] = useState<"dark" | "reveal" | "complete">("dark");
   const reducedMotion = useReducedMotion();
+  const containerRef = useRef<HTMLDivElement>(null);
 
-  // Parallax 3D effect for descriptor text
-  const parallaxText = useParallaxText({
-    intensity: 15,
-    smoothness: 0.08,
-    maxRotation: 5,
-    enabled: !reducedMotion && morphComplete,
-  });
+  // Mouse tracking for parallax
+  const mouseX = useMotionValue(0);
+  const mouseY = useMotionValue(0);
 
-  // Font loading timeout: show fallback if fonts don't load in 5s
+  // Smooth spring physics for parallax layers
+  const springConfig = { damping: 25, stiffness: 150 };
+  const smoothMouseX = useSpring(mouseX, springConfig);
+  const smoothMouseY = useSpring(mouseY, springConfig);
+
+  // Parallax transforms for different layers (deeper = slower)
+  const orbX = useTransform(smoothMouseX, [-0.5, 0.5], [30, -30]);
+  const orbY = useTransform(smoothMouseY, [-0.5, 0.5], [20, -20]);
+  const textX = useTransform(smoothMouseX, [-0.5, 0.5], [8, -8]);
+  const textY = useTransform(smoothMouseY, [-0.5, 0.5], [5, -5]);
+
+  // Sequence the reveal (skip effect when reduced motion - derive phase during render)
   useEffect(() => {
-    const timeout = setTimeout(() => {
-      if (!fontsLoaded && !fontError) {
-        console.warn("Font loading timeout - showing fallback text");
-        setShowFallback(true);
-        setMorphComplete(true);
-      }
-    }, 5000);
-    return () => clearTimeout(timeout);
-  }, [fontsLoaded, fontError]);
+    if (reducedMotion) return;
+    const revealTimer = setTimeout(() => setPhase("reveal"), 200);
+    const completeTimer = setTimeout(() => setPhase("complete"), 2000);
+    return () => {
+      clearTimeout(revealTimer);
+      clearTimeout(completeTimer);
+    };
+  }, [reducedMotion]);
 
-
-  // Show nav 300ms after morph completes
+  // Track mouse position
   useEffect(() => {
-    if (morphComplete) {
-      const navTimer = setTimeout(() => setNavVisible(true), 300);
-      return () => clearTimeout(navTimer);
-    }
-  }, [morphComplete]);
+    const handleMouseMove = (e: MouseEvent) => {
+      if (!containerRef.current) return;
+      const rect = containerRef.current.getBoundingClientRect();
+      const x = (e.clientX - rect.left) / rect.width - 0.5;
+      const y = (e.clientY - rect.top) / rect.height - 0.5;
+      mouseX.set(x);
+      mouseY.set(y);
+    };
+    window.addEventListener("mousemove", handleMouseMove);
+    return () => window.removeEventListener("mousemove", handleMouseMove);
+  }, [mouseX, mouseY]);
+
+  const effectivePhase = reducedMotion ? "complete" : phase;
+  const isRevealed =
+    effectivePhase === "reveal" || effectivePhase === "complete";
+  const isComplete = effectivePhase === "complete";
 
   return (
-    <section className="section-hero relative">
-      {/* Navigation - slides in after assembly */}
-      <Navbar visible={navVisible} />
+    <section
+      ref={containerRef}
+      className="section-hero relative overflow-hidden bg-space"
+    >
+      {/* Deep background - static noise texture */}
+      <div
+        className="absolute inset-0 opacity-[0.015]"
+        style={{
+          backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E")`,
+        }}
+      />
 
-      {/* Three.js Canvas Background */}
-      <Scene className="!pointer-events-auto">
-        {/* Enhanced lighting setup - rebalanced for letter readability */}
-
-        {/* Ambient - slightly increased for base visibility */}
-        <ambientLight intensity={SHADER.LIGHTING.AMBIENT_INTENSITY} />
-
-        {/* Key light - reduced for less washout */}
-        <directionalLight
-          position={[10, 10, 5]}
-          intensity={SHADER.LIGHTING.KEY_INTENSITY}
-          color="#ffffff"
+      {/* Atmospheric orb layer - moves slowest on parallax */}
+      <motion.div
+        className="absolute inset-0 pointer-events-none"
+        style={{ x: orbX, y: orbY }}
+      >
+        {/* Primary blue orb - top right */}
+        <div
+          className="absolute top-[15%] right-[10%] w-[600px] h-[600px] rounded-full"
+          style={{
+            background:
+              "radial-gradient(circle at center, rgba(96, 165, 250, 0.08) 0%, rgba(96, 165, 250, 0.02) 40%, transparent 70%)",
+            filter: "blur(60px)",
+          }}
         />
 
-        {/* Fill light - warm side fill, reduced */}
-        <pointLight
-          position={[-8, 3, 8]}
-          intensity={SHADER.LIGHTING.FILL_INTENSITY}
-          color="#ffd4a3"
-          distance={30}
+        {/* Secondary purple orb - bottom left */}
+        <div
+          className="absolute bottom-[10%] left-[5%] w-[500px] h-[500px] rounded-full"
+          style={{
+            background:
+              "radial-gradient(circle at center, rgba(139, 92, 246, 0.06) 0%, rgba(139, 92, 246, 0.015) 50%, transparent 70%)",
+            filter: "blur(80px)",
+          }}
         />
 
-        {/* Rim light - significantly reduced to prevent edge blowout */}
-        <pointLight
-          position={[0, -5, -10]}
-          intensity={SHADER.LIGHTING.RIM_INTENSITY}
-          color="#60a5fa"
-          distance={40}
+        {/* Subtle center glow that emerges with text */}
+        <motion.div
+          initial={{ opacity: 0, scale: 0.8 }}
+          animate={isRevealed ? { opacity: 1, scale: 1 } : {}}
+          transition={{ duration: 2, ease: "easeOut" }}
+          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[400px]"
+          style={{
+            background:
+              "radial-gradient(ellipse at center, rgba(96, 165, 250, 0.04) 0%, transparent 60%)",
+            filter: "blur(40px)",
+          }}
         />
+      </motion.div>
 
-        {/* Accent light - purple for iridescent pop, reduced */}
-        <pointLight
-          position={[5, -3, 5]}
-          intensity={SHADER.LIGHTING.ACCENT_INTENSITY}
-          color="#a855f7"
-          distance={25}
-        />
+      {/* Edge vignette for depth */}
+      <div
+        className="absolute inset-0 pointer-events-none"
+        style={{
+          background:
+            "radial-gradient(ellipse 70% 60% at 50% 50%, transparent 0%, rgba(10, 10, 11, 0.4) 100%)",
+        }}
+      />
 
-        {/* Ambient Particle Field - minimal */}
-        <AmbientParticles count={80} opacity={0.25} speed={0.08} />
+      {/* Spotlight effect */}
+      <Spotlight
+        className="-top-40 left-0 md:left-60 md:-top-20"
+        fill="rgba(96, 165, 250, 0.15)"
+      />
 
-        {/* Parallax Camera Controller - disabled for reduced motion */}
-        <CameraController
-          enabled={!reducedMotion}
-          intensity={2.5}
-          smoothness={0.06}
-          idleDrift={!reducedMotion}
-        />
+      {/* Navigation */}
+      <Navbar visible={isComplete} />
 
-        {/* Fragment Assembly - 3D letters persist throughout */}
-        {!showFallback && (
-          <FragmentAssembly
-            autoPlay
-            autoPlayDelay={800}
-            onAssemblyComplete={() => {/* Assembly complete */}}
-            onMorphComplete={() => setMorphComplete(true)}
-            onFontsLoaded={setFontsLoaded}
-            onFontError={() => {
-              console.error("Font loading failed - showing fallback text");
-              setFontError(true);
-              setShowFallback(true);
-              setMorphComplete(true);
-            }}
-          />
-        )}
-      </Scene>
+      {/* Main content layer */}
+      <div className="relative z-10 flex flex-col items-center justify-center min-h-screen px-4">
+        {/* Typography container with subtle parallax */}
+        <motion.div className="text-center" style={{ x: textX, y: textY }}>
+          {/* Name - with HyperText scramble effect */}
+          <div className="relative">
+            {/* TAYLOR */}
+            <motion.div
+              initial={{ opacity: 0, y: 40, filter: "blur(10px)" }}
+              animate={
+                isRevealed
+                  ? {
+                      opacity: 1,
+                      y: 0,
+                      filter: "blur(0px)",
+                    }
+                  : {}
+              }
+              transition={{
+                duration: 1.2,
+                ease: [0.16, 1, 0.3, 1],
+                delay: 0.1,
+              }}
+              className="relative"
+            >
+              {isRevealed ? (
+                <HyperText
+                  as="h1"
+                  duration={1200}
+                  delay={300}
+                  animateOnHover={true}
+                  className="text-[clamp(3rem,11vw,9rem)] font-semibold tracking-[-0.02em] text-white leading-[0.85] font-display select-none"
+                  style={{
+                    textShadow: isComplete
+                      ? "0 0 80px rgba(96, 165, 250, 0.15)"
+                      : "none",
+                  }}
+                >
+                  TAYLOR
+                </HyperText>
+              ) : (
+                <h1 className="text-[clamp(3rem,11vw,9rem)] font-semibold tracking-[-0.02em] text-white leading-[0.85] font-display select-none opacity-0">
+                  TAYLOR
+                </h1>
+              )}
+            </motion.div>
 
-      {/* Fallback 2D Text - shown if fonts fail to load */}
-      <FallbackText visible={showFallback} />
-
-      {/* Content Layer */}
-      <div className="container-portfolio relative z-10 pointer-events-none">
-        {/* Descriptor Text - appears after morph completes (only if not using fallback) */}
-        {morphComplete && !showFallback && (
-          <div
-            className="absolute left-1/2 top-1/2 translate-y-26 text-center"
-            style={{
-              transform: `translate(-50%, calc(50% + 2.5rem)) ${parallaxText.transform}`,
-              transformStyle: "preserve-3d",
-              perspective: "1000px",
-            }}
-          >
-            <p className="text-[0.9rem] tracking-[0.2em] text-white/60 animate-fade-in font-extralight">
-              {CONTENT.DESCRIPTOR}
-            </p>
+            {/* ALLEN - slightly offset for depth */}
+            <motion.div
+              initial={{ opacity: 0, y: 40, filter: "blur(10px)" }}
+              animate={
+                isRevealed
+                  ? {
+                      opacity: 1,
+                      y: 0,
+                      filter: "blur(0px)",
+                    }
+                  : {}
+              }
+              transition={{
+                duration: 1.2,
+                ease: [0.16, 1, 0.3, 1],
+                delay: 0.25,
+              }}
+              className="relative -mt-2 ml-[0.05em]"
+            >
+              {isRevealed ? (
+                <HyperText
+                  as="h1"
+                  duration={1200}
+                  delay={500}
+                  animateOnHover={true}
+                  className="text-[clamp(3rem,11vw,9rem)] font-semibold tracking-[-0.02em] text-white leading-[0.85] font-display select-none"
+                  style={{
+                    textShadow: isComplete
+                      ? "0 0 80px rgba(96, 165, 250, 0.15)"
+                      : "none",
+                  }}
+                >
+                  ALLEN
+                </HyperText>
+              ) : (
+                <h1 className="text-[clamp(3rem,11vw,9rem)] font-semibold tracking-[-0.02em] text-white leading-[0.85] font-display select-none opacity-0">
+                  ALLEN
+                </h1>
+              )}
+            </motion.div>
           </div>
-        )}
+
+          {/* Descriptor with elegant fade */}
+          <motion.p
+            initial={{ opacity: 0, y: 15 }}
+            animate={isComplete ? { opacity: 1, y: 0 } : {}}
+            transition={{
+              duration: 0.8,
+              delay: 0.6,
+              ease: [0.16, 1, 0.3, 1],
+            }}
+            className="mt-6 text-[0.75rem] tracking-[0.15em] text-white/30 font-light"
+          >
+            Full-Stack Engineer & Founder · Stanford Healthcare · 3x Founder
+          </motion.p>
+        </motion.div>
       </div>
 
-      {/* Scroll indicator - positioned relative to section */}
-      <div className="absolute left-1/2 -translate-x-1/2 -bottom-2 flex flex-col items-center gap-2 z-10 pointer-events-none">
-        <span className="text-[0.5rem] tracking-[0.25em] uppercase text-white/40">
+      {/* Scroll indicator */}
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={isComplete ? { opacity: 1 } : {}}
+        transition={{ duration: 0.6, delay: 0.8 }}
+        className="absolute left-1/2 -translate-x-1/2 bottom-10 flex flex-col items-center gap-3 z-10"
+      >
+        <span className="text-[0.6rem] tracking-[0.3em] uppercase text-white/25">
           Scroll
         </span>
-        <div className="w-px h-12 bg-linear-to-b from-white/40 to-transparent" />
-      </div>
+        <div className="relative w-px h-10 overflow-hidden">
+          <motion.div
+            animate={{
+              y: ["-100%", "100%"],
+              opacity: [0, 1, 1, 0],
+            }}
+            transition={{
+              duration: 1.8,
+              repeat: Infinity,
+              ease: "easeInOut",
+            }}
+            className="absolute inset-0 w-full bg-linear-to-b from-transparent via-white/30 to-transparent"
+          />
+        </div>
+      </motion.div>
+
+      {/* Top gradient fade for navbar blend */}
+      <div
+        className="absolute top-0 left-0 right-0 h-40 pointer-events-none z-40"
+        style={{
+          background:
+            "linear-gradient(to bottom, rgba(10, 10, 11, 0.8) 0%, transparent 100%)",
+        }}
+      />
     </section>
   );
 }
