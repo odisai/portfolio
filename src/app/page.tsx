@@ -1,8 +1,7 @@
 import { Hero } from "@/components/sections/hero";
-import { CurrentBuild } from "@/components/sections/current-build";
-import { Archive } from "@/components/sections/archive";
 import { Method } from "@/components/sections/method";
-import { Credentials } from "@/components/sections/credentials";
+import { CurrentBuild } from "@/components/sections/current-build";
+import { Experience } from "@/components/sections/experience";
 import { Contact } from "@/components/sections/contact";
 import { SmoothScroll } from "@/components/layout/smooth-scroll";
 
@@ -13,8 +12,7 @@ export default function Home() {
         <Hero />
         <Method />
         <CurrentBuild />
-        <Archive />
-        <Credentials />
+        <Experience />
         <Contact />
       </main>
     </SmoothScroll>
