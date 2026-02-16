@@ -66,10 +66,14 @@ export function TextGlow({ visible = false }: TextGlowProps) {
         uScrollProgress: { value: 0 },
         uTime: { value: 0 },
         uColorCenter: {
-          value: new THREE.Vector3(...(SHADER.COLORS.IRIDESCENT_BLUE as [number, number, number])),
+          value: new THREE.Vector3(
+            ...(SHADER.COLORS.IRIDESCENT_BLUE as [number, number, number]),
+          ),
         },
         uColorEdge: {
-          value: new THREE.Vector3(...(SHADER.COLORS.IRIDESCENT_PURPLE as [number, number, number])),
+          value: new THREE.Vector3(
+            ...(SHADER.COLORS.IRIDESCENT_PURPLE as [number, number, number]),
+          ),
         },
       },
       vertexShader: glowVertexShader,
@@ -81,7 +85,9 @@ export function TextGlow({ visible = false }: TextGlowProps) {
     });
   }, []);
 
-  materialRef.current = material;
+  useEffect(() => {
+    materialRef.current = material;
+  }, [material]);
 
   // Animate intensity and scroll effects
   useFrame(({ clock }) => {

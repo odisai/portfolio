@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useMemo } from "react";
+import { useRef, useMemo, useEffect } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 import { SHADER } from "@/lib/constants";
@@ -91,7 +91,7 @@ export function GradientOrbs({ enabled = true }: GradientOrbsProps) {
         driftOffset: 4.2,
       },
     ],
-    []
+    [],
   );
 
   // Create shader materials
@@ -115,8 +115,10 @@ export function GradientOrbs({ enabled = true }: GradientOrbsProps) {
     });
   }, [orbConfigs]);
 
-  // Store materials in ref for animation updates
-  materialsRef.current = materials;
+  // Store materials in ref for animation updates (must run in effect, not during render)
+  useEffect(() => {
+    materialsRef.current = materials;
+  }, [materials]);
 
   // Smooth scroll tracking
   useFrame(({ clock }) => {
@@ -130,9 +132,7 @@ export function GradientOrbs({ enabled = true }: GradientOrbsProps) {
     const scrollProgress = scrollRef.current;
 
     // Update each orb
-    materials.forEach((material, index) => {
-      const config = orbConfigs[index];
-
+    materials.forEach((material) => {
       material.uniforms.uTime.value = time;
       material.uniforms.uScrollProgress.value = scrollProgress;
     });
