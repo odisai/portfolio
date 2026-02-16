@@ -160,7 +160,7 @@ export const CONTENT = {
     CURRENT: {
       name: "OdisAI",
       role: "Co-Founder & CTO",
-      description: "AI veterinary scribe technology automating clinical documentation",
+      description: "Voice AI that answers your clinic's phones 24/7, books appointments, and handles follow-up calls",
       credentials: ["UC Davis PLASMA Accelerator", "NSF I-Corps Regional", "NECX Elev X Phase 2"],
     },
     PAST: [
