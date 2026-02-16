@@ -3,6 +3,7 @@
 import { useRef, useMemo, useEffect, useState } from "react";
 import { motion, useScroll, useTransform, MotionValue } from "framer-motion";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
+import { OrbitingCircles } from "@/components/ui/orbiting-circles";
 
 // ============================================
 // FILM GRAIN COMPONENT
@@ -11,11 +12,10 @@ import { useReducedMotion } from "@/hooks/useReducedMotion";
 function FilmGrain() {
   const [seed, setSeed] = useState(0);
 
-  // Animate grain by changing seed
   useEffect(() => {
     let frameId: number;
     let lastTime = 0;
-    const fps = 24; // Film-like frame rate
+    const fps = 24;
     const interval = 1000 / fps;
 
     const animate = (time: number) => {
@@ -31,7 +31,7 @@ function FilmGrain() {
   }, []);
 
   return (
-    <svg className="pointer-events-none fixed inset-0 w-full h-full z-50 opacity-[0.025]">
+    <svg className="pointer-events-none fixed inset-0 w-full h-full z-50 opacity-[0.02]">
       <filter id="grain-filter">
         <feTurbulence
           type="fractalNoise"
@@ -63,6 +63,50 @@ function Vignette() {
 }
 
 // ============================================
+// ORBITING SHAPES VISUAL ACCENT
+// ============================================
+
+function OrbitingShapes() {
+  return (
+    <div className="relative flex h-[400px] w-full items-center justify-center">
+      {/* Center glow */}
+      <div className="absolute w-32 h-32 bg-blue-500/10 rounded-full blur-[60px]" />
+      <div className="absolute w-20 h-20 bg-purple-500/10 rounded-full blur-[40px]" />
+
+      {/* Inner orbit */}
+      <OrbitingCircles
+        className="border-none bg-transparent"
+        duration={25}
+        radius={80}
+        path={true}
+        iconSize={24}
+        speed={0.8}
+      >
+        <div className="w-4 h-4 rounded-full bg-gradient-to-br from-blue-400/60 to-blue-600/40 backdrop-blur-sm" />
+        <div className="w-3 h-3 rounded-sm bg-gradient-to-br from-purple-400/50 to-purple-600/30 rotate-45" />
+        <div className="w-4 h-4 rounded-full bg-gradient-to-br from-cyan-400/40 to-blue-500/30" />
+      </OrbitingCircles>
+
+      {/* Outer orbit */}
+      <OrbitingCircles
+        className="border-none bg-transparent"
+        duration={35}
+        radius={140}
+        path={true}
+        iconSize={32}
+        reverse
+        speed={0.6}
+      >
+        <div className="w-5 h-5 rounded-lg bg-gradient-to-br from-blue-500/40 to-indigo-600/30 backdrop-blur-sm rotate-12" />
+        <div className="w-4 h-4 rounded-full bg-gradient-to-br from-purple-400/30 to-pink-500/20" />
+        <div className="w-3 h-3 rounded-sm bg-gradient-to-br from-cyan-400/50 to-teal-500/30 rotate-45" />
+        <div className="w-5 h-5 rounded-full bg-gradient-to-br from-blue-400/30 to-purple-500/20" />
+      </OrbitingCircles>
+    </div>
+  );
+}
+
+// ============================================
 // TYPES
 // ============================================
 
@@ -88,9 +132,8 @@ const statements: Statement[] = [
   },
 ];
 
-// Scroll height multiplier - provides scroll distance for reveals
-// Single statement block with multiple emphasis reveals
-const SCROLL_HEIGHT_MULTIPLIER = 3.5;
+// Reduced scroll height for faster scroll
+const SCROLL_HEIGHT_MULTIPLIER = 2.5;
 
 // ============================================
 // UTILITY FUNCTIONS
@@ -102,13 +145,10 @@ function isWordEmphasis(word: string, emphasisList: string[]): boolean {
   return emphasisList.some((em) => {
     const cleanEm = em.toLowerCase();
 
-    // Check if the word matches the full emphasis phrase exactly
     if (cleanWord === cleanEm) return true;
 
-    // Check if any individual word in the emphasis phrase matches
     const emphasisWords = cleanEm.split(" ");
     return emphasisWords.some((emphWord) => {
-      // Exact match for short words (like "10")
       if (emphWord.length < 3 || cleanWord.length < 3) {
         return cleanWord === emphWord;
       }
@@ -117,7 +157,6 @@ function isWordEmphasis(word: string, emphasisList: string[]): boolean {
   });
 }
 
-// Build a flat list of all emphasis words with their scroll thresholds
 function buildEmphasisMap(): EmphasisMapping[] {
   const mappings: EmphasisMapping[] = [];
 
@@ -127,13 +166,12 @@ function buildEmphasisMap(): EmphasisMapping[] {
         mappings.push({
           statementIndex: statementIdx,
           wordIndex: wordIdx,
-          threshold: 0, // Will be calculated below
+          threshold: 0,
         });
       }
     });
   });
 
-  // Distribute thresholds evenly across scroll range (15% to 85%)
   const totalWords = mappings.length;
   mappings.forEach((mapping, idx) => {
     mapping.threshold = 0.15 + (idx / (totalWords - 1)) * 0.7;
@@ -159,10 +197,8 @@ function RevealWord({
   threshold,
   scrollProgress,
 }: RevealWordProps) {
-  // Always call hooks unconditionally at the top
-  const transitionWidth = 0.05; // Smooth transition window
+  const transitionWidth = 0.05;
 
-  // Calculate progress for both color and glow
   const progress = useTransform(scrollProgress, (latest) => {
     const start = threshold - transitionWidth;
     if (latest <= start) return 0;
@@ -175,12 +211,9 @@ function RevealWord({
     return `rgba(255, 255, 255, ${opacity})`;
   });
 
-  // Glow effect - subtle bloom with chromatic shift
-  // Uses hero's iridescent colors: blue (#60a5fa) and purple (#a855f7)
   const glowOpacity = useTransform(progress, (p) => p * 0.6);
   const glowBlur = useTransform(progress, (p) => `${8 + p * 12}px`);
 
-  // Chromatic aberration - slight color shift at edges
   const blueGlow = useTransform(progress, (p) =>
     `0 0 ${20 * p}px rgba(96, 165, 250, ${0.15 * p})`
   );
@@ -191,13 +224,11 @@ function RevealWord({
     `0 0 ${30 * p}px rgba(255, 255, 255, ${0.08 * p})`
   );
 
-  // Combined text-shadow for chromatic bloom effect
   const textShadow = useTransform(
     [blueGlow, purpleGlow, whiteGlow],
     ([blue, purple, white]) => `${blue}, ${purple}, ${white}`
   );
 
-  // Non-emphasis words stay at 40% opacity (render decision after hooks)
   if (!isEmphasis) {
     return (
       <span
@@ -209,13 +240,11 @@ function RevealWord({
     );
   }
 
-  // Emphasis words reveal based on scroll threshold
   return (
     <motion.span
       className="inline-block mr-[0.25em] relative"
       style={{ color, textShadow }}
     >
-      {/* Background bloom - soft radial glow behind text */}
       <motion.span
         className="absolute inset-0 -z-10 rounded-sm"
         style={{
@@ -247,11 +276,10 @@ function StatementBlock({
   const words = statement.text.split(" ");
 
   return (
-    <p className="text-[clamp(1.5rem,5vw,3.5rem)] font-light leading-[1.3] tracking-tight max-w-5xl">
+    <p className="text-[clamp(1.5rem,5vw,3.5rem)] font-light leading-[1.3] tracking-tight max-w-4xl">
       {words.map((word, wordIdx) => {
         const isEmphasis = isWordEmphasis(word, statement.emphasis);
 
-        // Find threshold for this word (if it's an emphasis word)
         const mapping = emphasisMap.find(
           (m) => m.statementIndex === statementIndex && m.wordIndex === wordIdx
         );
@@ -280,30 +308,35 @@ function MethodStatic() {
       </div>
 
       <div className="container-portfolio relative z-10">
-        <div className="space-y-12">
-          {statements.map((statement, index) => (
-            <p
-              key={index}
-              className="text-[clamp(1.5rem,5vw,3.5rem)] font-light leading-[1.3] tracking-tight max-w-5xl"
-            >
-              {statement.text.split(" ").map((word, wordIdx) => {
-                const isEmphasis = isWordEmphasis(word, statement.emphasis);
-                return (
-                  <span
-                    key={`${word}-${wordIdx}`}
-                    className="inline-block mr-[0.25em]"
-                    style={{
-                      color: isEmphasis
-                        ? "rgba(255, 255, 255, 1)"
-                        : "rgba(255, 255, 255, 0.4)",
-                    }}
-                  >
-                    {word}
-                  </span>
-                );
-              })}
-            </p>
-          ))}
+        <div className="grid grid-cols-1 lg:grid-cols-[1fr_auto] gap-16 items-center">
+          <div className="space-y-12">
+            {statements.map((statement, index) => (
+              <p
+                key={index}
+                className="text-[clamp(1.5rem,5vw,3.5rem)] font-light leading-[1.3] tracking-tight max-w-4xl"
+              >
+                {statement.text.split(" ").map((word, wordIdx) => {
+                  const isEmphasis = isWordEmphasis(word, statement.emphasis);
+                  return (
+                    <span
+                      key={`${word}-${wordIdx}`}
+                      className="inline-block mr-[0.25em]"
+                      style={{
+                        color: isEmphasis
+                          ? "rgba(255, 255, 255, 1)"
+                          : "rgba(255, 255, 255, 0.4)",
+                      }}
+                    >
+                      {word}
+                    </span>
+                  );
+                })}
+              </p>
+            ))}
+          </div>
+          <div className="hidden lg:block">
+            <OrbitingShapes />
+          </div>
         </div>
       </div>
     </section>
@@ -318,16 +351,13 @@ export function Method() {
   const sectionRef = useRef<HTMLElement>(null);
   const reducedMotion = useReducedMotion();
 
-  // Pre-compute emphasis mappings with thresholds
   const emphasisMap = useMemo(() => buildEmphasisMap(), []);
 
-  // Track scroll progress through the section
   const { scrollYProgress } = useScroll({
     target: sectionRef,
     offset: ["start start", "end end"],
   });
 
-  // For reduced motion: show all text revealed immediately
   if (reducedMotion) {
     return <MethodStatic />;
   }
@@ -338,12 +368,9 @@ export function Method() {
       className="relative bg-[#0A0A0B]"
       style={{ height: `${SCROLL_HEIGHT_MULTIPLIER * 100}vh` }}
     >
-      {/* Sticky container - pins content exactly in place while scrolling */}
+      {/* Sticky container */}
       <div className="sticky top-0 h-screen overflow-hidden">
-        {/* Vignette overlay - cinematic depth */}
         <Vignette />
-
-        {/* Film grain overlay - animated noise texture */}
         <FilmGrain />
 
         {/* Background accent */}
@@ -351,20 +378,27 @@ export function Method() {
           <div className="absolute top-1/2 left-0 w-[400px] h-[400px] bg-blue-600/[0.03] rounded-full blur-[100px] -translate-y-1/2" />
         </div>
 
-        {/* Content container - absolutely positioned to prevent any movement */}
+        {/* Content container - split layout */}
         <div className="absolute inset-0 flex items-center">
           <div className="container-portfolio relative z-10">
-            {/* All statements visible, left-aligned, completely static */}
-            <div className="space-y-12">
-              {statements.map((statement, index) => (
-                <StatementBlock
-                  key={index}
-                  statement={statement}
-                  statementIndex={index}
-                  emphasisMap={emphasisMap}
-                  scrollProgress={scrollYProgress}
-                />
-              ))}
+            <div className="grid grid-cols-1 lg:grid-cols-[1fr_auto] gap-8 lg:gap-16 items-center">
+              {/* Text on left */}
+              <div className="space-y-12">
+                {statements.map((statement, index) => (
+                  <StatementBlock
+                    key={index}
+                    statement={statement}
+                    statementIndex={index}
+                    emphasisMap={emphasisMap}
+                    scrollProgress={scrollYProgress}
+                  />
+                ))}
+              </div>
+
+              {/* Orbiting circles on right - hidden on mobile */}
+              <div className="hidden lg:block">
+                <OrbitingShapes />
+              </div>
             </div>
           </div>
         </div>
