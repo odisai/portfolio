@@ -5,22 +5,19 @@ import { motion } from "framer-motion";
 import { CONTENT } from "@/lib/constants";
 import { SectionLabel } from "@/components/ui/section-label";
 import { Footer } from "@/components/layout/footer";
+import { ShimmerButton } from "@/components/ui/shimmer-button";
 import { useSectionInView } from "@/hooks/useSectionInView";
 
-// Deterministic positions to avoid hydration mismatch
+// Reduced to 8 fragments for cleaner look
 const FRAGMENT_POSITIONS = [
   { left: 15, top: 20, rotate: 12 },
-  { left: 75, top: 15, rotate: 35 },
-  { left: 25, top: 65, rotate: 8 },
-  { left: 85, top: 45, rotate: 42 },
-  { left: 45, top: 80, rotate: 22 },
-  { left: 60, top: 30, rotate: 5 },
-  { left: 10, top: 50, rotate: 38 },
-  { left: 90, top: 70, rotate: 15 },
-  { left: 35, top: 25, rotate: 28 },
-  { left: 70, top: 85, rotate: 40 },
-  { left: 55, top: 55, rotate: 18 },
-  { left: 20, top: 90, rotate: 33 },
+  { left: 80, top: 15, rotate: 35 },
+  { left: 25, top: 70, rotate: 8 },
+  { left: 85, top: 55, rotate: 42 },
+  { left: 50, top: 85, rotate: 22 },
+  { left: 65, top: 35, rotate: 5 },
+  { left: 10, top: 45, rotate: 38 },
+  { left: 90, top: 75, rotate: 15 },
 ];
 
 export function Contact() {
@@ -117,21 +114,29 @@ export function Contact() {
           ) : (
             <>
               <form onSubmit={handleSubmit} className="flex gap-3">
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="your@email.com"
-                  className="flex-1 px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white placeholder:text-white/30 focus:outline-none focus:border-white/30 transition-colors"
-                  required
-                />
-                <button
+                <div className="relative flex-1 group">
+                  <input
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="your@email.com"
+                    className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white placeholder:text-white/30 focus:outline-none focus:border-blue-500/50 transition-all duration-300"
+                    required
+                  />
+                  {/* Focus glow effect */}
+                  <div className="absolute inset-0 rounded-lg bg-blue-500/20 opacity-0 blur-xl transition-opacity duration-300 pointer-events-none group-focus-within:opacity-100" />
+                </div>
+                <ShimmerButton
                   type="submit"
                   disabled={isSubmitting}
-                  className="px-6 py-3 bg-white text-black text-sm font-medium rounded-lg hover:bg-white/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  shimmerColor="#60a5fa"
+                  shimmerSize="0.06em"
+                  background="rgba(255, 255, 255, 0.95)"
+                  borderRadius="8px"
+                  className="px-6 py-3 text-sm font-medium text-black disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {isSubmitting ? "..." : "Send"}
-                </button>
+                </ShimmerButton>
               </form>
               {error && (
                 <p className="mt-3 text-sm text-red-400">{error}</p>
@@ -176,7 +181,7 @@ export function Contact() {
           initial={{ opacity: 0 }}
           animate={isInView ? { opacity: 1 } : {}}
           transition={{ duration: 0.6, delay: 0.6 }}
-          className="flex items-center gap-4"
+          className="flex items-center gap-4 mb-24"
         >
           <span className="text-xs text-white/40">{CONTENT.LOCATION}</span>
           <span className="flex items-center gap-2">
