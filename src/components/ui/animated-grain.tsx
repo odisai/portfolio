@@ -22,7 +22,6 @@ export function AnimatedGrain({
     if (reducedMotion || !animated) return;
 
     let seed = 0;
-    let interval: NodeJS.Timeout;
 
     const animate = () => {
       seed = (seed + 1) % 100;
@@ -33,7 +32,7 @@ export function AnimatedGrain({
     };
 
     // Animate at ~10fps for subtle grain movement
-    interval = setInterval(animate, 100);
+    const interval = setInterval(animate, 100);
 
     return () => {
       clearInterval(interval);
