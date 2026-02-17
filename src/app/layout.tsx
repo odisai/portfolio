@@ -1,7 +1,8 @@
 import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
-import "./globals.css";
 import { LedgerGrid } from "@/components/ui/ledger-grid";
+import { Analytics } from "@vercel/analytics/next";
+import "./globals.css";
 
 // Body font - Satoshi Variable
 const satoshi = localFont({
@@ -108,6 +109,8 @@ export default function RootLayout({
         <div className="noise-overlay" aria-hidden="true" />
         {/* Vignette for depth */}
         <div className="vignette-overlay" aria-hidden="true" />
+
+        <Analytics />
       </body>
     </html>
   );
