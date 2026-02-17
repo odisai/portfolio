@@ -21,12 +21,12 @@ export function Navbar({ visible = true, className }: NavbarProps) {
       )}
       style={{ transitionTimingFunction: "cubic-bezier(0.16, 1, 0.3, 1)" }}
     >
-      <a href="#top" className="flex items-center gap-3 text-pearl/80 hover:text-pearl transition-colors">
+      <a href="#top" className="flex items-center gap-3 text-pearl/90 hover:text-pearl transition-colors">
         <Monogram className="h-8 w-8" />
-        <span className="text-[0.7rem] tracking-[0.4em] uppercase text-pearl/60">{CONTENT.LOCATION}</span>
+        <span className="text-[0.7rem] tracking-[0.4em] uppercase text-pearl/70">{CONTENT.LOCATION}</span>
       </a>
 
-      <div className="hidden md:flex items-center gap-8 text-[0.65rem] tracking-[0.35em] uppercase text-pearl/50">
+      <div className="hidden md:flex items-center gap-8 text-[0.65rem] tracking-[0.35em] uppercase text-pearl/65">
         <a href="#work" className="hover:text-pearl transition-colors">Work</a>
         <a href="#method" className="hover:text-pearl transition-colors">Method</a>
         <a href="#experience" className="hover:text-pearl transition-colors">Experience</a>

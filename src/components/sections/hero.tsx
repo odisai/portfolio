@@ -34,7 +34,7 @@ export function Hero() {
         </BlurFade>
 
         <BlurFade delay={0.2}>
-          <p className="mt-6 max-w-2xl text-lg text-pearl/60">
+          <p className="mt-6 max-w-2xl text-lg text-pearl/70">
             {CONTENT.HERO.POSITIONING}
           </p>
         </BlurFade>
@@ -69,7 +69,7 @@ export function Hero() {
                   <NumberTicker value={stat.value} />
                   <span className="text-copper">{stat.suffix}</span>
                 </div>
-                <p className="mt-2 text-[0.65rem] uppercase tracking-[0.4em] text-pearl/40">
+                <p className="mt-2 text-[0.65rem] uppercase tracking-[0.4em] text-pearl/55">
                   {stat.label}
                 </p>
               </div>

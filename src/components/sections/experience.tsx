@@ -11,7 +11,7 @@ export function Experience() {
       </div>
       <div className="container-portfolio">
         <BlurFade>
-          <p className="text-[0.65rem] tracking-[0.4em] uppercase text-pearl/40">Experience</p>
+          <p className="text-[0.65rem] tracking-[0.4em] uppercase text-pearl/55">Experience</p>
           <h2 className="mt-4 text-display text-[clamp(2rem,6vw,4.5rem)] leading-[1.05]">
             A focused timeline of impact
           </h2>
@@ -24,13 +24,13 @@ export function Experience() {
                 <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2">
                   <div>
                     <h3 className="text-lg text-display text-pearl">{item.title}</h3>
-                    <p className="text-sm text-pearl/50">{item.role}</p>
+                    <p className="text-sm text-pearl/65">{item.role}</p>
                   </div>
                   <span className="text-[0.7rem] tracking-[0.4em] uppercase text-copper">
                     {item.year}
                   </span>
                 </div>
-                <p className="mt-3 text-sm text-pearl/60">{item.summary}</p>
+                <p className="mt-3 text-sm text-pearl/70">{item.summary}</p>
               </div>
             </BlurFade>
           ))}

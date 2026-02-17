@@ -12,7 +12,7 @@ export function Method() {
       </div>
       <div className="container-portfolio">
         <BlurFade>
-          <p className="text-[0.65rem] tracking-[0.4em] uppercase text-pearl/40">Method</p>
+          <p className="text-[0.65rem] tracking-[0.4em] uppercase text-pearl/55">Method</p>
           <h2 className="mt-4 text-display text-[clamp(2rem,6vw,4.5rem)] leading-[1.05]">
             A tight, founder-grade delivery loop
           </h2>
@@ -26,7 +26,7 @@ export function Method() {
                   0{index + 1}
                 </p>
                 <h3 className="mt-4 text-xl text-display text-pearl">{item.title}</h3>
-                <p className="mt-3 text-sm text-pearl/60">{item.description}</p>
+                <p className="mt-3 text-sm text-pearl/70">{item.description}</p>
               </EdgeCard>
             </BlurFade>
           ))}

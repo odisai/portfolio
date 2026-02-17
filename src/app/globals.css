@@ -10,17 +10,17 @@
 
 @theme inline {
   /* Core palette */
-  --color-obsidian: #070708;
-  --color-surface: #0e0f11;
-  --color-surface-2: #14151a;
+  --color-obsidian: #070709;
+  --color-surface: #12141a;
+  --color-surface-2: #171a22;
 
-  --color-pearl: #e7e2d9;
-  --color-pearl-dim: rgba(231, 226, 217, 0.6);
-  --color-pearl-muted: rgba(231, 226, 217, 0.35);
+  --color-pearl: #f4f0e8;
+  --color-pearl-dim: rgba(244, 240, 232, 0.75);
+  --color-pearl-muted: rgba(244, 240, 232, 0.5);
 
-  --color-copper: #c48a5a;
-  --color-copper-dim: rgba(196, 138, 90, 0.4);
-  --color-copper-glow: rgba(196, 138, 90, 0.25);
+  --color-copper: #d9a06b;
+  --color-copper-dim: rgba(217, 160, 107, 0.5);
+  --color-copper-glow: rgba(217, 160, 107, 0.35);
 
   /* Typography */
   --font-display: "Clash Display", var(--font-satoshi), sans-serif;
@@ -36,8 +36,8 @@
   --duration-1000: 1000ms;
 
   /* Effects */
-  --texture-grain-opacity: 0.05;
-  --texture-ledger-opacity: 0.18;
+  --texture-grain-opacity: 0.035;
+  --texture-ledger-opacity: 0.22;
 }
 
 :root {
@@ -49,8 +49,8 @@
   --primary-foreground: #120d0a;
   --muted: var(--color-surface-2);
   --muted-foreground: var(--color-pearl-muted);
-  --border: rgba(255, 255, 255, 0.06);
-  --input: rgba(255, 255, 255, 0.06);
+  --border: rgba(255, 255, 255, 0.12);
+  --input: rgba(255, 255, 255, 0.12);
   --ring: var(--color-copper);
 }
 
@@ -132,7 +132,7 @@ body {
 }
 
 .monogram-watermark {
-  opacity: 0.08;
+  opacity: 0.12;
   filter: blur(0.2px);
 }
 
@@ -232,8 +232,8 @@ html.lenis, html.lenis body {
     border-color: rgba(196, 138, 90, 0.5);
   }
 
-  .surface-card {
-    background-color: rgba(14, 15, 17, 0.85);
+.surface-card {
+    background-color: rgba(18, 20, 26, 0.92);
   }
 
   .animate-marquee {
