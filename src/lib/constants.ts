@@ -2,6 +2,30 @@
 // PORTFOLIO CONTENT — Obsidian Atelier
 // ═══════════════════════════════════════════════════════════════════
 
+/** Three.js / hero shader and post-processing config */
+export const SHADER = {
+  COLORS: {
+    IRIDESCENT_BLUE: [0.2, 0.5, 0.9] as [number, number, number],
+    IRIDESCENT_PURPLE: [0.5, 0.2, 0.8] as [number, number, number],
+  },
+  BASE_OPACITY: 0.85,
+  CHROMATIC_ABERRATION: 0.002,
+  DOF: {
+    FOCUS_DISTANCE: 0.01,
+    FOCAL_LENGTH: 0.02,
+    BOKEH_SCALE: 2,
+    HEIGHT: 480,
+  },
+  BLOOM_INTENSITY: 0.4,
+  BLOOM_THRESHOLD: 0.85,
+  BLOOM_RADIUS: 0.4,
+} as const;
+
+/** Hero 3D assembly / morph animation timings (ms) */
+export const ANIMATION = {
+  ASSEMBLY_DURATION: 2400,
+} as const;
+
 export const CONTENT = {
   NAME: "Taylor Allen",
   TAGLINE: "Builder of premium, scalable systems",
