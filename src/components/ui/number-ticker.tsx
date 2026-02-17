@@ -2,6 +2,8 @@
 
 import React from "react";
 import { cn } from "@/lib/utils";
+import { useReducedMotion } from "@/hooks/useReducedMotion";
+import { useDeviceCapabilities } from "@/hooks/useDeviceCapabilities";
 
 interface NumberTickerProps {
   value: number;
@@ -20,8 +22,17 @@ export function NumberTicker({
 }: NumberTickerProps) {
   const [displayValue, setDisplayValue] = React.useState(0);
   const startRef = React.useRef<number | null>(null);
+  const reducedMotion = useReducedMotion();
+  const { isMobile, isLowEnd, isTouch } = useDeviceCapabilities();
+  const disableTickerAnimation = reducedMotion || isMobile || isLowEnd || isTouch;
 
   React.useEffect(() => {
+    if (disableTickerAnimation) {
+      setDisplayValue(value);
+      return;
+    }
+
+    startRef.current = null;
     let rafId: number;
 
     const tick = (time: number) => {
@@ -34,7 +45,7 @@ export function NumberTicker({
 
     rafId = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(rafId);
-  }, [value, duration]);
+  }, [disableTickerAnimation, value, duration]);
 
   return (
     <span className={cn("tabular-nums", className)}>

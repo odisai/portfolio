@@ -2,6 +2,8 @@
 
 import React from "react";
 import { cn } from "@/lib/utils";
+import { useDeviceCapabilities } from "@/hooks/useDeviceCapabilities";
+import { useReducedMotion } from "@/hooks/useReducedMotion";
 
 interface CardSpotlightProps {
   children: React.ReactNode;
@@ -14,6 +16,9 @@ export function CardSpotlight({
   className,
   spotlightColor = "rgba(196, 138, 90, 0.18)",
 }: CardSpotlightProps) {
+  const reducedMotion = useReducedMotion();
+  const { isMobile, isLowEnd, isTouch } = useDeviceCapabilities();
+  const disableSpotlight = reducedMotion || isMobile || isLowEnd || isTouch;
   const containerRef = React.useRef<HTMLDivElement>(null);
 
   const handleMouseMove = (event: React.MouseEvent<HTMLDivElement>) => {
@@ -24,6 +29,10 @@ export function CardSpotlight({
     containerRef.current?.style.setProperty("--spotlight-x", `${x}px`);
     containerRef.current?.style.setProperty("--spotlight-y", `${y}px`);
   };
+
+  if (disableSpotlight) {
+    return <div className={cn("relative overflow-hidden", className)}>{children}</div>;
+  }
 
   return (
     <div

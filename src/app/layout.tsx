@@ -100,7 +100,7 @@ export default function RootLayout({
         </div>
 
         {/* Global ledger grid texture */}
-        <div className="fixed inset-0 z-[9995] pointer-events-none opacity-[0.04]">
+        <div className="ledger-overlay fixed inset-0 z-[9995] pointer-events-none opacity-[0.04]">
           <LedgerGrid />
         </div>
 

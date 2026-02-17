@@ -3,6 +3,7 @@
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
+import { useDeviceCapabilities } from "@/hooks/useDeviceCapabilities";
 
 interface BlurFadeProps {
   children: React.ReactNode;
@@ -22,8 +23,10 @@ export function BlurFade({
   once = true,
 }: BlurFadeProps) {
   const reducedMotion = useReducedMotion();
+  const { isMobile, isLowEnd, isTouch } = useDeviceCapabilities();
+  const disableAnimation = reducedMotion || isMobile || isLowEnd || isTouch;
 
-  if (reducedMotion) {
+  if (disableAnimation) {
     return <div className={className}>{children}</div>;
   }
 

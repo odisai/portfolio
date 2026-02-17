@@ -5,6 +5,7 @@ import { useState, useEffect } from "react";
 export interface DeviceCapabilities {
   isMobile: boolean;
   isLowEnd: boolean;
+  isTouch: boolean;
   targetVertexCount: number;
 }
 
@@ -12,36 +13,65 @@ export interface DeviceCapabilities {
  * Detect device capabilities for performance optimization
  */
 export function useDeviceCapabilities(): DeviceCapabilities {
-  const [capabilities, setCapabilities] = useState<DeviceCapabilities>(() => {
-    // Compute initial state during render
-    const isMobile = typeof window !== "undefined" ? window.innerWidth < 768 : false;
-    const cpuCores = typeof navigator !== "undefined" ? navigator.hardwareConcurrency || 4 : 4;
-    const isLowEnd = cpuCores < 4 || isMobile;
-    const targetVertexCount = isLowEnd ? 4000 : 8000;
+  const getCapabilities = (): DeviceCapabilities => {
+    if (typeof window === "undefined") {
+      return {
+        isMobile: false,
+        isLowEnd: false,
+        isTouch: false,
+        targetVertexCount: 8000,
+      };
+    }
+
+    const isMobile = window.matchMedia("(max-width: 767px)").matches;
+    const prefersReducedMotion = window.matchMedia(
+      "(prefers-reduced-motion: reduce)",
+    ).matches;
+    const isTouch = window.matchMedia("(pointer: coarse)").matches;
+    const cpuCores = navigator.hardwareConcurrency || 4;
+    const deviceMemory = (
+      navigator as Navigator & {
+        deviceMemory?: number;
+      }
+    ).deviceMemory;
+
+    const isLowEnd =
+      prefersReducedMotion ||
+      isMobile ||
+      isTouch ||
+      cpuCores <= 4 ||
+      (deviceMemory !== undefined && deviceMemory <= 4);
 
     return {
       isMobile,
       isLowEnd,
-      targetVertexCount,
+      isTouch,
+      targetVertexCount: isLowEnd ? 3000 : 8000,
     };
+  };
+
+  const [capabilities, setCapabilities] = useState<DeviceCapabilities>(() => {
+    return getCapabilities();
   });
 
   useEffect(() => {
-    // Only handle resize in the effect
-    const handleResize = () => {
-      const newIsMobile = window.innerWidth < 768;
-      const cpuCores = navigator.hardwareConcurrency || 4;
-      const newIsLowEnd = newIsMobile || cpuCores < 4;
+    const update = () => setCapabilities(getCapabilities());
+    const mobileMq = window.matchMedia("(max-width: 767px)");
+    const reducedMq = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const touchMq = window.matchMedia("(pointer: coarse)");
 
-      setCapabilities({
-        isMobile: newIsMobile,
-        isLowEnd: newIsLowEnd,
-        targetVertexCount: newIsLowEnd ? 4000 : 8000,
-      });
+    update();
+    window.addEventListener("resize", update);
+    mobileMq.addEventListener("change", update);
+    reducedMq.addEventListener("change", update);
+    touchMq.addEventListener("change", update);
+
+    return () => {
+      window.removeEventListener("resize", update);
+      mobileMq.removeEventListener("change", update);
+      reducedMq.removeEventListener("change", update);
+      touchMq.removeEventListener("change", update);
     };
-
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
   }, []);
 
   return capabilities;

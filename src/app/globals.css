@@ -40,6 +40,11 @@
   /* Effects */
   --texture-grain-opacity: 0.02;
   --texture-ledger-opacity: 0.1;
+  --divider-line: rgba(255, 250, 242, 0.16);
+  --divider-line-soft: rgba(255, 250, 242, 0.08);
+  --divider-warm: rgba(240, 187, 132, 0.2);
+  --divider-cool: rgba(103, 141, 143, 0.17);
+  --divider-halo: rgba(111, 138, 186, 0.2);
 }
 
 :root {
@@ -124,6 +129,207 @@ body {
   max-width: 1400px;
   margin: 0 auto;
   padding-inline: clamp(1.5rem, 5vw, 4rem);
+}
+
+.section-divider {
+  padding-block: clamp(2.7rem, 7vw, 5.2rem);
+}
+
+.section-divider-field {
+  background:
+    radial-gradient(68% 180% at 84% 48%, var(--divider-warm), transparent 70%),
+    radial-gradient(62% 170% at 18% 52%, var(--divider-cool), transparent 72%),
+    linear-gradient(
+      180deg,
+      rgba(14, 15, 19, 0.04) 0%,
+      rgba(14, 15, 19, 0.84) 48%,
+      rgba(14, 15, 19, 0.04) 100%
+    );
+  filter: saturate(116%);
+}
+
+.section-divider-field::before,
+.section-divider-field::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+}
+
+.section-divider-field::before {
+  background:
+    radial-gradient(34% 92% at 54% 50%, var(--divider-halo), transparent 72%),
+    repeating-linear-gradient(
+      to bottom,
+      rgba(255, 255, 255, 0.024) 0px,
+      rgba(255, 255, 255, 0.024) 1px,
+      transparent 1px,
+      transparent 6px
+    );
+  mix-blend-mode: screen;
+  opacity: 0.38;
+}
+
+.section-divider-field::after {
+  background: linear-gradient(
+    105deg,
+    transparent 35%,
+    rgba(255, 255, 255, 0.07) 50%,
+    transparent 63%
+  );
+  opacity: 0.18;
+}
+
+.section-divider-rails::before,
+.section-divider-rails::after {
+  content: "";
+  position: absolute;
+  left: clamp(1.5rem, 5vw, 4rem);
+  right: clamp(1.5rem, 5vw, 4rem);
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    var(--divider-line-soft) 18%,
+    var(--divider-line) 50%,
+    var(--divider-line-soft) 82%,
+    transparent 100%
+  );
+}
+
+.section-divider-rails::before {
+  top: 0;
+}
+
+.section-divider-rails::after {
+  bottom: 0;
+}
+
+.section-divider-track {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: clamp(0.7rem, 2.6vw, 1.75rem);
+}
+
+.section-divider-track::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: min(84vw, 760px);
+  height: clamp(30px, 5vw, 46px);
+  transform: translate(-50%, -50%);
+  background:
+    linear-gradient(
+      90deg,
+      transparent 0%,
+      rgba(240, 187, 132, 0.19) 50%,
+      transparent 100%
+    );
+  border: 1px solid rgba(255, 250, 242, 0.11);
+  clip-path: polygon(0 40%, 3.6% 0, 96.4% 0, 100% 40%, 96.4% 100%, 3.6% 100%);
+  box-shadow: 0 0 38px rgba(240, 187, 132, 0.2);
+  opacity: 0.78;
+}
+
+.section-divider-rule {
+  position: relative;
+  z-index: 1;
+  height: 1px;
+  flex: 1;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    var(--divider-line-soft) 28%,
+    var(--divider-line) 50%,
+    var(--divider-line-soft) 72%,
+    transparent 100%
+  );
+}
+
+.section-divider-label {
+  position: relative;
+  z-index: 1;
+  font-size: 0.61rem;
+  line-height: 1;
+  text-transform: uppercase;
+  letter-spacing: 0.38em;
+  color: rgba(255, 250, 242, 0.84);
+  text-shadow: 0 0 18px rgba(240, 187, 132, 0.34);
+}
+
+.signal-strip {
+  position: relative;
+  padding-block: clamp(3.8rem, 9vw, 6.4rem);
+}
+
+.signal-strip-header {
+  display: flex;
+  align-items: center;
+  gap: clamp(0.7rem, 2vw, 1.25rem);
+}
+
+.signal-strip-label {
+  font-size: 0.58rem;
+  letter-spacing: 0.42em;
+  text-transform: uppercase;
+  color: rgba(255, 250, 242, 0.82);
+  text-shadow: 0 0 14px rgba(240, 187, 132, 0.26);
+}
+
+.signal-strip-rule {
+  display: block;
+  height: 1px;
+  flex: 1;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 250, 242, 0.1) 30%,
+    rgba(255, 250, 242, 0.24) 50%,
+    rgba(255, 250, 242, 0.1) 70%,
+    transparent 100%
+  );
+}
+
+.signal-strip-rail {
+  position: relative;
+  margin-top: clamp(1.25rem, 2.8vw, 2rem);
+  padding-block: clamp(1rem, 2vw, 1.35rem);
+  border-top: 1px solid rgba(255, 250, 242, 0.12);
+  border-bottom: 1px solid rgba(255, 250, 242, 0.12);
+}
+
+.signal-strip-rail::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(56% 190% at 78% 52%, rgba(240, 187, 132, 0.14), transparent 72%),
+    radial-gradient(58% 190% at 14% 50%, rgba(103, 141, 143, 0.12), transparent 74%),
+    linear-gradient(180deg, rgba(12, 13, 18, 0.2) 0%, rgba(12, 13, 18, 0.56) 50%, rgba(12, 13, 18, 0.2) 100%);
+}
+
+.signal-strip-marquee,
+.signal-strip-static {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+}
+
+.signal-strip-pill {
+  display: inline-flex;
+  align-items: center;
+  margin-inline: 0.4rem;
+  padding: 0.42rem 0.8rem;
+  border: 1px solid rgba(255, 250, 242, 0.13);
+  background: linear-gradient(135deg, rgba(19, 24, 36, 0.78) 0%, rgba(11, 14, 22, 0.84) 100%);
+  font-size: 0.58rem;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  color: rgba(255, 250, 242, 0.78);
+  white-space: nowrap;
 }
 
 /* ═══════════════════════════════════════════════════════════════════
@@ -384,6 +590,51 @@ html.lenis, html.lenis body {
   .depth-section::before,
   .depth-section::after {
     animation: none !important;
+  }
+}
+
+@media (max-width: 767px), (pointer: coarse) {
+  .global-atmosphere,
+  .noise-overlay,
+  .ledger-overlay {
+    display: none;
+  }
+
+  .vignette-overlay {
+    background: radial-gradient(
+      ellipse 76% 64% at 50% 42%,
+      transparent 0%,
+      rgba(0, 0, 0, 0.3) 100%
+    );
+  }
+
+  .depth-section::before,
+  .depth-section::after {
+    animation: none !important;
+    filter: blur(18px);
+  }
+
+  .section-divider-track::before {
+    width: min(88vw, 640px);
+    height: 32px;
+    opacity: 0.64;
+  }
+
+  .section-divider-label {
+    font-size: 0.56rem;
+    letter-spacing: 0.3em;
+  }
+
+  .signal-strip-label {
+    letter-spacing: 0.34em;
+    font-size: 0.54rem;
+  }
+
+  .signal-strip-pill {
+    margin-inline: 0.3rem;
+    padding: 0.4rem 0.62rem;
+    letter-spacing: 0.24em;
+    font-size: 0.54rem;
   }
 }
 

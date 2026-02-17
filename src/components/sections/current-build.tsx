@@ -1,12 +1,13 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { motion, AnimatePresence, useInView } from "framer-motion";
 import { CONTENT } from "@/lib/constants";
 import { BlurFade } from "@/components/ui/blur-fade";
 import { CardSpotlight } from "@/components/ui/card-spotlight";
 import { EdgeCard } from "@/components/ui/edge-card";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
+import { useDeviceCapabilities } from "@/hooks/useDeviceCapabilities";
 
 type CallStep = "incoming" | "triage" | "booking" | "confirm";
 
@@ -46,10 +47,10 @@ const TRANSCRIPT = [
   },
 ];
 
-function PulseRings() {
+function PulseRings({ count = 3 }: { count?: number }) {
   return (
     <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-      {[0, 1, 2].map((i) => (
+      {Array.from({ length: count }, (_, i) => (
         <motion.div
           key={i}
           className="absolute w-20 h-20 rounded-full border border-copper/20"
@@ -71,12 +72,31 @@ function TranscriptBubble({
   sender,
   text,
   delay,
+  animated = true,
 }: {
   sender: "ai" | "client";
   text: string;
   delay: number;
+  animated?: boolean;
 }) {
   const isAI = sender === "ai";
+
+  if (!animated) {
+    return (
+      <div className={`flex ${isAI ? "justify-start" : "justify-end"}`}>
+        <div
+          className={`max-w-[80%] rounded-2xl px-3 py-2 text-[10px] leading-[1.4] ${
+            isAI
+              ? "bg-white/[0.06] text-pearl/85 border border-white/10"
+              : "bg-copper/20 text-pearl border border-copper/30"
+          }`}
+        >
+          {text}
+        </div>
+      </div>
+    );
+  }
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 8 }}
@@ -99,29 +119,40 @@ function TranscriptBubble({
 
 function OdisAIPreview() {
   const reducedMotion = useReducedMotion();
+  const { isMobile, isLowEnd, isTouch } = useDeviceCapabilities();
   const [step, setStep] = useState<CallStep>("incoming");
+  const previewRef = useRef<HTMLDivElement>(null);
+  const isPreviewInView = useInView(previewRef, { margin: "-20% 0px -20% 0px" });
+  const minimalMode = reducedMotion || isMobile || isLowEnd || isTouch;
 
   useEffect(() => {
-    if (reducedMotion) return;
+    if (reducedMotion || !isPreviewInView) return;
+
     const timeout = setTimeout(() => {
       const idx = STEP_ORDER.indexOf(step);
       setStep(
         idx === STEP_ORDER.length - 1 ? STEP_ORDER[0] : STEP_ORDER[idx + 1],
       );
     }, STEP_DURATIONS[step]);
+
     return () => clearTimeout(timeout);
-  }, [step, reducedMotion]);
+  }, [step, reducedMotion, isPreviewInView]);
 
   const stepIndex = useMemo(() => STEP_ORDER.indexOf(step), [step]);
   const effectiveStepIndex = reducedMotion ? STEP_ORDER.length - 1 : stepIndex;
 
-  const visibleTranscript = TRANSCRIPT.filter(
+  const transcriptForStep = TRANSCRIPT.filter(
     (item) => STEP_ORDER.indexOf(item.step as CallStep) <= effectiveStepIndex,
   );
+  const visibleTranscript = minimalMode
+    ? transcriptForStep.slice(-3)
+    : transcriptForStep;
 
   return (
-    <div className="relative w-full max-w-[280px] mx-auto">
-      <div className="absolute -inset-8 rounded-full bg-copper/15 blur-[90px]" />
+    <div ref={previewRef} className="relative w-full max-w-[280px] mx-auto">
+      <div
+        className={`absolute rounded-full bg-copper/15 ${minimalMode ? "-inset-6 blur-[70px]" : "-inset-8 blur-[90px]"}`}
+      />
       <div className="relative aspect-9/19 rounded-[32px] bg-black border border-white/15 overflow-hidden">
         <div className="absolute inset-0 bg-linear-to-b from-[#121622] via-black to-black" />
         <div className="absolute inset-0 opacity-40 bg-[radial-gradient(circle_at_50%_20%,rgba(240,187,132,0.12),transparent_55%)]" />
@@ -146,7 +177,7 @@ function OdisAIPreview() {
                 {effectiveStepIndex === 0 ? "Ringing" : "Live"}
               </div>
             </div>
-            {effectiveStepIndex === 0 && <PulseRings />}
+            {effectiveStepIndex === 0 && !minimalMode && <PulseRings count={2} />}
           </div>
 
           <div className="mt-4 flex-1 overflow-hidden rounded-xl border border-white/10 bg-black/60 p-3">
@@ -155,34 +186,55 @@ function OdisAIPreview() {
               <span className="text-pearl/35">After-hours assistant</span>
             </div>
             <div className="mt-3 space-y-2">
-              <AnimatePresence>
-                {visibleTranscript.map((item, index) => (
+              {minimalMode ? (
+                visibleTranscript.map((item, index) => (
                   <TranscriptBubble
                     key={`${item.text}-${index}`}
                     sender={item.sender as "ai" | "client"}
                     text={item.text}
-                    delay={index * 0.12}
+                    delay={0}
+                    animated={false}
                   />
-                ))}
-              </AnimatePresence>
+                ))
+              ) : (
+                <AnimatePresence>
+                  {visibleTranscript.map((item, index) => (
+                    <TranscriptBubble
+                      key={`${item.text}-${index}`}
+                      sender={item.sender as "ai" | "client"}
+                      text={item.text}
+                      delay={index * 0.12}
+                    />
+                  ))}
+                </AnimatePresence>
+              )}
             </div>
           </div>
 
           <AnimatePresence mode="wait">
             {effectiveStepIndex >= 2 && (
-              <motion.div
-                key="appointment"
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: 8 }}
-                transition={{ duration: 0.4 }}
-                className="mt-4 rounded-2xl border border-copper/30 bg-copper/12 p-3"
-              >
-                <p className="text-[10px] text-copper">Appointment booked</p>
-                <p className="text-[9px] text-pearl/60">
-                  Tomorrow · 9:00 AM · Dr. Chen
-                </p>
-              </motion.div>
+              minimalMode ? (
+                <div className="mt-4 rounded-2xl border border-copper/30 bg-copper/12 p-3">
+                  <p className="text-[10px] text-copper">Appointment booked</p>
+                  <p className="text-[9px] text-pearl/60">
+                    Tomorrow · 9:00 AM · Dr. Chen
+                  </p>
+                </div>
+              ) : (
+                <motion.div
+                  key="appointment"
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: 8 }}
+                  transition={{ duration: 0.4 }}
+                  className="mt-4 rounded-2xl border border-copper/30 bg-copper/12 p-3"
+                >
+                  <p className="text-[10px] text-copper">Appointment booked</p>
+                  <p className="text-[9px] text-pearl/60">
+                    Tomorrow · 9:00 AM · Dr. Chen
+                  </p>
+                </motion.div>
+              )
             )}
           </AnimatePresence>
 

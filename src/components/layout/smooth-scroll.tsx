@@ -3,6 +3,7 @@
 import { useEffect, useRef } from "react";
 import Lenis from "lenis";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
+import { useDeviceCapabilities } from "@/hooks/useDeviceCapabilities";
 
 interface SmoothScrollProps {
   children: React.ReactNode;
@@ -11,10 +12,11 @@ interface SmoothScrollProps {
 export function SmoothScroll({ children }: SmoothScrollProps) {
   const lenisRef = useRef<Lenis | null>(null);
   const reducedMotion = useReducedMotion();
+  const { isMobile, isLowEnd, isTouch } = useDeviceCapabilities();
 
   useEffect(() => {
-    // Don't enable smooth scroll if user prefers reduced motion
-    if (reducedMotion) return;
+    // Native scrolling is less janky on constrained/touch devices.
+    if (reducedMotion || isMobile || isLowEnd || isTouch) return;
 
     const lenis = new Lenis({
       duration: 0.8,
@@ -27,23 +29,27 @@ export function SmoothScroll({ children }: SmoothScrollProps) {
     });
 
     lenisRef.current = lenis;
+    let rafId = 0;
 
     function raf(time: number) {
       lenis.raf(time);
-      requestAnimationFrame(raf);
+      rafId = requestAnimationFrame(raf);
     }
 
-    requestAnimationFrame(raf);
+    rafId = requestAnimationFrame(raf);
 
     // Expose lenis to global scope for GSAP ScrollTrigger integration
     // @ts-expect-error - Adding to window for GSAP
     window.lenis = lenis;
 
     return () => {
+      cancelAnimationFrame(rafId);
       lenis.destroy();
       lenisRef.current = null;
+      // @ts-expect-error - Added to window for GSAP
+      delete window.lenis;
     };
-  }, [reducedMotion]);
+  }, [isLowEnd, isMobile, isTouch, reducedMotion]);
 
   return <>{children}</>;
 }
