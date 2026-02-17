@@ -76,6 +76,16 @@ export function Hero() {
             ))}
           </div>
         </BlurFade>
+
+        <BlurFade delay={0.5}>
+          <div className="mt-10 flex flex-wrap items-center gap-6 text-[0.65rem] uppercase tracking-[0.4em] text-pearl/40">
+            <span className="flex items-center gap-3">
+              <span className="h-2 w-2 rounded-full bg-[var(--color-copper)] shadow-[0_0_10px_rgba(196,138,90,0.6)]" />
+              Available for select engagements
+            </span>
+            <span className="text-mono text-pearl/30">OBS-ATELIER // 2026</span>
+          </div>
+        </BlurFade>
       </div>
     </section>
   );

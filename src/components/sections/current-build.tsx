@@ -59,6 +59,9 @@ function CaseStudyCard({
   return (
     <CardSpotlight className="h-full">
       <EdgeCard className="h-full p-8">
+        <div className="absolute top-6 right-6 text-[0.6rem] uppercase tracking-[0.4em] text-pearl/35">
+          Case Study
+        </div>
         <div className="flex flex-col lg:flex-row gap-8 h-full">
           <div className="flex-1">
             <p className="text-[0.65rem] tracking-[0.4em] uppercase text-pearl/40">
@@ -121,6 +124,11 @@ export function CaseStudies() {
           <h2 className="mt-4 text-display text-[clamp(2rem,6vw,4.5rem)] leading-[1.05]">
             Highlighted experiences with real impact
           </h2>
+        </BlurFade>
+        <BlurFade delay={0.1}>
+          <p className="mt-3 text-mono text-[0.7rem] tracking-[0.3em] uppercase text-pearl/30">
+            03 curated engagements · founder-grade outcomes
+          </p>
         </BlurFade>
 
         <div className="mt-12 grid grid-cols-1 gap-8">
