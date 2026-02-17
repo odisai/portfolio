@@ -9,7 +9,7 @@ export function LedgerGrid({ className }: LedgerGridProps) {
   return (
     <div className={cn("absolute inset-0", className)} aria-hidden="true">
       <GridPattern
-        className="opacity-[var(--texture-ledger-opacity)]"
+        className="opacity-texture-ledger-opacity"
         stroke="rgba(231, 226, 217, 0.18)"
       />
 

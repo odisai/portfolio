@@ -52,7 +52,7 @@ function PulseRings() {
       {[0, 1, 2].map((i) => (
         <motion.div
           key={i}
-          className="absolute w-20 h-20 rounded-full border border-[var(--color-copper)]/20"
+          className="absolute w-20 h-20 rounded-full border border-copper/20"
           initial={{ scale: 0.7, opacity: 0.6 }}
           animate={{ scale: 2.1, opacity: 0 }}
           transition={{
@@ -88,7 +88,7 @@ function TranscriptBubble({
         className={`max-w-[80%] rounded-2xl px-3 py-2 text-[10px] leading-[1.4] ${
           isAI
             ? "bg-white/[0.06] text-pearl/85 border border-white/10"
-            : "bg-[var(--color-copper)]/20 text-pearl border border-[var(--color-copper)]/30"
+            : "bg-copper/20 text-pearl border border-copper/30"
         }`}
       >
         {text}
@@ -105,7 +105,9 @@ function OdisAIPreview() {
     if (reducedMotion) return;
     const timeout = setTimeout(() => {
       const idx = STEP_ORDER.indexOf(step);
-      setStep(idx === STEP_ORDER.length - 1 ? STEP_ORDER[0] : STEP_ORDER[idx + 1]);
+      setStep(
+        idx === STEP_ORDER.length - 1 ? STEP_ORDER[0] : STEP_ORDER[idx + 1],
+      );
     }, STEP_DURATIONS[step]);
     return () => clearTimeout(timeout);
   }, [step, reducedMotion]);
@@ -114,14 +116,14 @@ function OdisAIPreview() {
   const effectiveStepIndex = reducedMotion ? STEP_ORDER.length - 1 : stepIndex;
 
   const visibleTranscript = TRANSCRIPT.filter(
-    (item) => STEP_ORDER.indexOf(item.step as CallStep) <= effectiveStepIndex
+    (item) => STEP_ORDER.indexOf(item.step as CallStep) <= effectiveStepIndex,
   );
 
   return (
     <div className="relative w-full max-w-[280px] mx-auto">
-      <div className="absolute -inset-8 rounded-full bg-[var(--color-copper)]/15 blur-[90px]" />
-      <div className="relative aspect-[9/19] rounded-[32px] bg-black border border-white/15 overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-b from-[#121622] via-black to-black" />
+      <div className="absolute -inset-8 rounded-full bg-copper/15 blur-[90px]" />
+      <div className="relative aspect-9/19 rounded-[32px] bg-black border border-white/15 overflow-hidden">
+        <div className="absolute inset-0 bg-linear-to-b from-[#121622] via-black to-black" />
         <div className="absolute inset-0 opacity-40 bg-[radial-gradient(circle_at_50%_20%,rgba(240,187,132,0.12),transparent_55%)]" />
         <div className="absolute top-4 left-1/2 -translate-x-1/2 w-20 h-5 rounded-full bg-black border border-white/10" />
         <div className="relative z-10 p-4 flex flex-col h-full">
@@ -130,11 +132,13 @@ function OdisAIPreview() {
             <span className="text-pearl/60">OdisAI</span>
           </div>
 
-          <div className="mt-5 rounded-xl border border-white/10 bg-white/[0.04] p-3 relative">
+          <div className="mt-5 rounded-xl border border-white/10 bg-white/4 p-3 relative">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-[11px] text-pearl/85">
-                  {effectiveStepIndex === 0 ? "Incoming call" : "After-hours triage"}
+                  {effectiveStepIndex === 0
+                    ? "Incoming call"
+                    : "After-hours triage"}
                 </p>
                 <p className="text-[9px] text-pearl/50">Sunnyvale Vet Clinic</p>
               </div>
@@ -172,7 +176,7 @@ function OdisAIPreview() {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: 8 }}
                 transition={{ duration: 0.4 }}
-                className="mt-4 rounded-2xl border border-[var(--color-copper)]/30 bg-[var(--color-copper)]/12 p-3"
+                className="mt-4 rounded-2xl border border-copper/30 bg-copper/12 p-3"
               >
                 <p className="text-[10px] text-copper">Appointment booked</p>
                 <p className="text-[9px] text-pearl/60">
@@ -209,9 +213,9 @@ function CaseStudyCard({
   title: string;
   role: string;
   summary: string;
-  highlights: string[];
-  metrics: string[];
-  stack: string[];
+  highlights: readonly string[];
+  metrics: readonly string[];
+  stack: readonly string[];
   visual?: React.ReactNode;
 }) {
   return (
@@ -231,7 +235,7 @@ function CaseStudyCard({
             <ul className="mt-5 space-y-2 text-sm text-pearl/70">
               {highlights.map((item) => (
                 <li key={item} className="flex items-start gap-2">
-                  <span className="mt-1.5 h-1.5 w-1.5 rounded-full bg-[var(--color-copper)]" />
+                  <span className="mt-1.5 h-1.5 w-1.5 rounded-full bg-copper" />
                   <span>{item}</span>
                 </li>
               ))}
@@ -260,7 +264,11 @@ function CaseStudyCard({
             </div>
           </div>
 
-          {visual && <div className="lg:w-[280px] flex items-center justify-center">{visual}</div>}
+          {visual && (
+            <div className="lg:w-[280px] flex items-center justify-center">
+              {visual}
+            </div>
+          )}
         </div>
       </EdgeCard>
     </CardSpotlight>
@@ -271,14 +279,16 @@ export function CaseStudies() {
   const [odisai, poppin, stanford] = CONTENT.CASE_STUDIES;
 
   return (
-    <section id="work" className="relative py-[var(--spacing-section)] bg-[var(--color-obsidian)]">
+    <section id="work" className="relative py-section bg-obsidian">
       <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute top-[10%] left-[5%] h-[320px] w-[320px] rounded-full bg-[var(--color-copper)]/5 blur-[120px]" />
+        <div className="absolute top-[10%] left-[5%] h-[320px] w-[320px] rounded-full bg-copper/5 blur-[120px]" />
         <div className="absolute bottom-[5%] right-[10%] h-[280px] w-[280px] rounded-full bg-white/5 blur-[120px]" />
       </div>
       <div className="container-portfolio">
         <BlurFade>
-          <p className="text-[0.65rem] tracking-[0.4em] uppercase text-pearl/70">Selected Work</p>
+          <p className="text-[0.65rem] tracking-[0.4em] uppercase text-pearl/70">
+            Selected Work
+          </p>
           <h2 className="mt-4 text-display text-[clamp(2rem,6vw,4.5rem)] leading-[1.05]">
             Highlighted experiences with real impact
           </h2>
