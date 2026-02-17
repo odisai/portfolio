@@ -93,7 +93,7 @@ export default function RootLayout({
         {children}
 
         {/* Global ledger grid texture */}
-        <div className="fixed inset-0 pointer-events-none opacity-[0.08]">
+        <div className="fixed inset-0 pointer-events-none opacity-[0.04]">
           <LedgerGrid />
         </div>
 

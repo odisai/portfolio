@@ -10,17 +10,17 @@
 
 @theme inline {
   /* Core palette */
-  --color-obsidian: #070709;
-  --color-surface: #12141a;
-  --color-surface-2: #171a22;
+  --color-obsidian: #0e0f13;
+  --color-surface: #171c2a;
+  --color-surface-2: #1f2536;
 
-  --color-pearl: #f4f0e8;
-  --color-pearl-dim: rgba(244, 240, 232, 0.75);
-  --color-pearl-muted: rgba(244, 240, 232, 0.5);
+  --color-pearl: #fffaf2;
+  --color-pearl-dim: rgba(255, 250, 242, 0.88);
+  --color-pearl-muted: rgba(255, 250, 242, 0.7);
 
-  --color-copper: #d9a06b;
-  --color-copper-dim: rgba(217, 160, 107, 0.5);
-  --color-copper-glow: rgba(217, 160, 107, 0.35);
+  --color-copper: #f0bb84;
+  --color-copper-dim: rgba(240, 187, 132, 0.7);
+  --color-copper-glow: rgba(240, 187, 132, 0.6);
 
   /* Typography */
   --font-display: "Clash Display", var(--font-satoshi), sans-serif;
@@ -36,8 +36,8 @@
   --duration-1000: 1000ms;
 
   /* Effects */
-  --texture-grain-opacity: 0.035;
-  --texture-ledger-opacity: 0.22;
+  --texture-grain-opacity: 0.02;
+  --texture-ledger-opacity: 0.1;
 }
 
 :root {
@@ -49,8 +49,8 @@
   --primary-foreground: #120d0a;
   --muted: var(--color-surface-2);
   --muted-foreground: var(--color-pearl-muted);
-  --border: rgba(255, 255, 255, 0.12);
-  --input: rgba(255, 255, 255, 0.12);
+  --border: rgba(255, 255, 255, 0.18);
+  --input: rgba(255, 255, 255, 0.18);
   --ring: var(--color-copper);
 }
 
@@ -92,6 +92,10 @@ body {
 .text-display {
   font-family: var(--font-display);
   letter-spacing: -0.02em;
+}
+
+.text-display-glow {
+  text-shadow: 0 0 40px rgba(227, 176, 122, 0.2);
 }
 
 .text-mono {
@@ -233,7 +237,7 @@ html.lenis, html.lenis body {
   }
 
 .surface-card {
-    background-color: rgba(18, 20, 26, 0.92);
+    background-color: rgba(23, 28, 42, 0.96);
   }
 
   .animate-marquee {

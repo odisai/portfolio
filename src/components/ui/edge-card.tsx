@@ -15,10 +15,10 @@ export function EdgeCard({ children, className }: EdgeCardProps) {
       )}
     >
       <div
-        className="absolute inset-0 opacity-[0.18]"
+        className="absolute inset-0 opacity-[0.1]"
         style={{
           backgroundImage:
-            "linear-gradient(transparent 0%, rgba(231,226,217,0.08) 100%), repeating-linear-gradient(0deg, rgba(231,226,217,0.06), rgba(231,226,217,0.06) 1px, transparent 1px, transparent 22px)",
+            "linear-gradient(transparent 0%, rgba(255,250,242,0.12) 100%), repeating-linear-gradient(0deg, rgba(255,250,242,0.06), rgba(255,250,242,0.06) 1px, transparent 1px, transparent 24px)",
         }}
       />
       <div className="absolute inset-0 opacity-30">

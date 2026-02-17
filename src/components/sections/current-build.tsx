@@ -68,9 +68,9 @@ function CaseStudyCard({
               {role}
             </p>
             <h3 className="mt-3 text-2xl text-display text-pearl">{title}</h3>
-            <p className="mt-3 text-sm text-pearl/70">{summary}</p>
+            <p className="mt-3 text-sm text-pearl/80">{summary}</p>
 
-            <ul className="mt-5 space-y-2 text-sm text-pearl/60">
+            <ul className="mt-5 space-y-2 text-sm text-pearl/70">
               {highlights.map((item) => (
                 <li key={item} className="flex items-start gap-2">
                   <span className="mt-1.5 h-1.5 w-1.5 rounded-full bg-[var(--color-copper)]" />
@@ -120,13 +120,13 @@ export function CaseStudies() {
       </div>
       <div className="container-portfolio">
         <BlurFade>
-          <p className="text-[0.65rem] tracking-[0.4em] uppercase text-pearl/55">Selected Work</p>
+          <p className="text-[0.65rem] tracking-[0.4em] uppercase text-pearl/70">Selected Work</p>
           <h2 className="mt-4 text-display text-[clamp(2rem,6vw,4.5rem)] leading-[1.05]">
             Highlighted experiences with real impact
           </h2>
         </BlurFade>
         <BlurFade delay={0.1}>
-          <p className="mt-3 text-mono text-[0.7rem] tracking-[0.3em] uppercase text-pearl/45">
+          <p className="mt-3 text-mono text-[0.7rem] tracking-[0.3em] uppercase text-pearl/60">
             03 curated engagements · founder-grade outcomes
           </p>
         </BlurFade>

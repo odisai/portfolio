@@ -11,7 +11,7 @@ export function SectionDivider({ label, className }: SectionDividerProps) {
       <div className="flex items-center gap-6">
         <div className="h-px flex-1 bg-gradient-to-r from-transparent via-white/10 to-transparent" />
         {label && (
-          <span className="text-[0.6rem] uppercase tracking-[0.4em] text-pearl/50">
+          <span className="text-[0.6rem] uppercase tracking-[0.4em] text-pearl/65">
             {label}
           </span>
         )}
