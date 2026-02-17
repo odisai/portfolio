@@ -7,11 +7,14 @@ import { Footer } from "@/components/layout/footer";
 
 export function Contact() {
   return (
-    <section id="contact" className="relative py-section bg-(--color-obsidian)">
+    <section
+      id="contact"
+      className="depth-section depth-contact relative overflow-hidden py-section bg-(--color-obsidian) scroll-mt-28 md:scroll-mt-32"
+    >
       <div className="absolute inset-0 pointer-events-none">
         <div className="absolute bottom-[10%] right-[10%] h-[260px] w-[260px] rounded-full bg-copper/6 blur-[120px]" />
       </div>
-      <div className="container-portfolio">
+      <div className="container-portfolio relative z-10">
         <BlurFade>
           <p className="text-[0.65rem] tracking-[0.4em] uppercase text-pearl/70">
             Book a Call

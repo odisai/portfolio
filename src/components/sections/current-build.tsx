@@ -279,12 +279,15 @@ export function CaseStudies() {
   const [odisai, poppin, stanford] = CONTENT.CASE_STUDIES;
 
   return (
-    <section id="work" className="relative py-section bg-obsidian">
+    <section
+      id="work"
+      className="depth-section depth-work relative overflow-hidden py-section bg-obsidian scroll-mt-28 md:scroll-mt-32"
+    >
       <div className="absolute inset-0 pointer-events-none">
         <div className="absolute top-[10%] left-[5%] h-[320px] w-[320px] rounded-full bg-copper/5 blur-[120px]" />
         <div className="absolute bottom-[5%] right-[10%] h-[280px] w-[280px] rounded-full bg-white/5 blur-[120px]" />
       </div>
-      <div className="container-portfolio">
+      <div className="container-portfolio relative z-10">
         <BlurFade>
           <p className="text-[0.65rem] tracking-[0.4em] uppercase text-pearl/70">
             Selected Work

@@ -21,6 +21,8 @@
   --color-copper: #f0bb84;
   --color-copper-dim: rgba(240, 187, 132, 0.7);
   --color-copper-glow: rgba(240, 187, 132, 0.6);
+  --color-slate-haze: #6a7b95;
+  --color-teal-haze: #678d8f;
 
   /* Typography */
   --font-display: "Clash Display", var(--font-satoshi), sans-serif;
@@ -73,6 +75,8 @@ body {
   line-height: 1.7;
   min-height: 100vh;
   overscroll-behavior: none;
+  position: relative;
+  isolation: isolate;
 }
 
 ::selection {
@@ -158,6 +162,184 @@ body {
   background-repeat: repeat;
 }
 
+.site-shell {
+  position: relative;
+  z-index: 2;
+}
+
+.global-atmosphere {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 9994;
+  overflow: hidden;
+}
+
+.atmosphere-mesh,
+.atmosphere-bloom,
+.atmosphere-haze,
+.atmosphere-sweep {
+  position: absolute;
+  inset: -22%;
+}
+
+.atmosphere-mesh {
+  background:
+    radial-gradient(62% 54% at 12% 16%, rgba(106, 123, 149, 0.2), transparent 72%),
+    radial-gradient(58% 52% at 88% 18%, rgba(240, 187, 132, 0.17), transparent 70%),
+    radial-gradient(60% 64% at 48% 84%, rgba(103, 141, 143, 0.15), transparent 76%);
+  filter: blur(44px) saturate(112%);
+  animation: atmosphereDrift 28s ease-in-out infinite alternate;
+}
+
+.atmosphere-bloom {
+  background:
+    radial-gradient(42% 38% at 82% 12%, rgba(240, 187, 132, 0.19), transparent 73%),
+    radial-gradient(34% 32% at 16% 80%, rgba(97, 121, 170, 0.13), transparent 72%);
+  filter: blur(54px);
+  animation: atmospherePulse 20s ease-in-out infinite;
+}
+
+.atmosphere-haze {
+  background-image: repeating-linear-gradient(
+    to bottom,
+    rgba(255, 255, 255, 0.016) 0px,
+    rgba(255, 255, 255, 0.016) 1px,
+    transparent 1px,
+    transparent 4px
+  );
+  opacity: 0.3;
+  mix-blend-mode: soft-light;
+}
+
+.atmosphere-sweep {
+  inset: -35%;
+  background: linear-gradient(
+    115deg,
+    transparent 44%,
+    rgba(255, 255, 255, 0.055) 50%,
+    rgba(240, 187, 132, 0.095) 53%,
+    transparent 58%
+  );
+  opacity: 0.22;
+  transform: translateX(-58%);
+  animation: atmosphereSweep 16s cubic-bezier(0.2, 1, 0.2, 1) infinite;
+}
+
+.depth-section {
+  position: relative;
+  isolation: isolate;
+}
+
+.depth-section::before,
+.depth-section::after {
+  content: "";
+  position: absolute;
+  inset: -28%;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.depth-section::before {
+  background:
+    radial-gradient(
+      56% 52% at var(--depth-primary-x, 80%) var(--depth-primary-y, 18%),
+      rgba(240, 187, 132, var(--depth-primary-alpha, 0.2)),
+      transparent 72%
+    ),
+    radial-gradient(
+      60% 56% at var(--depth-secondary-x, 14%) var(--depth-secondary-y, 78%),
+      rgba(103, 141, 143, var(--depth-secondary-alpha, 0.13)),
+      transparent 76%
+    );
+  filter: blur(30px);
+  opacity: var(--depth-opacity, 0.8);
+  animation: sectionBreath var(--depth-breathe-duration, 14s) ease-in-out infinite alternate;
+}
+
+.depth-section::after {
+  background: conic-gradient(
+    from 210deg at 50% 50%,
+    transparent 0deg,
+    rgba(255, 255, 255, 0.045) 58deg,
+    transparent 122deg,
+    rgba(240, 187, 132, 0.1) 190deg,
+    transparent 246deg,
+    rgba(106, 123, 149, 0.08) 322deg,
+    transparent 360deg
+  );
+  mix-blend-mode: screen;
+  opacity: var(--depth-sheen-opacity, 0.15);
+  animation: sectionOrbit var(--depth-orbit-duration, 24s) linear infinite;
+}
+
+.depth-hero {
+  --depth-primary-x: 86%;
+  --depth-primary-y: 16%;
+  --depth-primary-alpha: 0.28;
+  --depth-secondary-x: 16%;
+  --depth-secondary-y: 82%;
+  --depth-secondary-alpha: 0.15;
+  --depth-opacity: 1;
+  --depth-sheen-opacity: 0.21;
+}
+
+.depth-work {
+  --depth-primary-x: 84%;
+  --depth-primary-y: 30%;
+  --depth-primary-alpha: 0.24;
+  --depth-secondary-x: 18%;
+  --depth-secondary-y: 78%;
+  --depth-secondary-alpha: 0.13;
+  --depth-opacity: 0.9;
+  --depth-sheen-opacity: 0.17;
+}
+
+.depth-signal {
+  --depth-primary-x: 74%;
+  --depth-primary-y: 20%;
+  --depth-primary-alpha: 0.12;
+  --depth-secondary-x: 26%;
+  --depth-secondary-y: 74%;
+  --depth-secondary-alpha: 0.09;
+  --depth-opacity: 0.6;
+  --depth-sheen-opacity: 0.09;
+  --depth-orbit-duration: 32s;
+}
+
+.depth-method {
+  --depth-primary-x: 82%;
+  --depth-primary-y: 24%;
+  --depth-primary-alpha: 0.2;
+  --depth-secondary-x: 18%;
+  --depth-secondary-y: 82%;
+  --depth-secondary-alpha: 0.11;
+  --depth-opacity: 0.8;
+  --depth-sheen-opacity: 0.14;
+}
+
+.depth-experience {
+  --depth-primary-x: 76%;
+  --depth-primary-y: 18%;
+  --depth-primary-alpha: 0.16;
+  --depth-secondary-x: 20%;
+  --depth-secondary-y: 80%;
+  --depth-secondary-alpha: 0.1;
+  --depth-opacity: 0.72;
+  --depth-sheen-opacity: 0.1;
+}
+
+.depth-contact {
+  --depth-primary-x: 84%;
+  --depth-primary-y: 78%;
+  --depth-primary-alpha: 0.3;
+  --depth-secondary-x: 18%;
+  --depth-secondary-y: 20%;
+  --depth-secondary-alpha: 0.14;
+  --depth-opacity: 1;
+  --depth-sheen-opacity: 0.2;
+}
+
 /* ═══════════════════════════════════════════════════════════════════
    LENIS SMOOTH SCROLL STYLES
    ═══════════════════════════════════════════════════════════════════ */
@@ -195,6 +377,14 @@ html.lenis, html.lenis body {
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
   }
+
+  .atmosphere-sweep,
+  .atmosphere-mesh,
+  .atmosphere-bloom,
+  .depth-section::before,
+  .depth-section::after {
+    animation: none !important;
+  }
 }
 
 /* ═══════════════════════════════════════════════════════════════════
@@ -209,6 +399,33 @@ html.lenis, html.lenis body {
 @keyframes marquee-reverse {
   0% { transform: translateX(-100%); }
   100% { transform: translateX(0); }
+}
+
+@keyframes atmosphereDrift {
+  0% { transform: translate3d(-2%, -1%, 0) scale(1); }
+  100% { transform: translate3d(2%, 2%, 0) scale(1.04); }
+}
+
+@keyframes atmospherePulse {
+  0%, 100% { opacity: 0.75; }
+  50% { opacity: 1; }
+}
+
+@keyframes atmosphereSweep {
+  0% { transform: translateX(-58%); opacity: 0; }
+  10% { opacity: 0.18; }
+  60% { opacity: 0.18; }
+  100% { transform: translateX(58%); opacity: 0; }
+}
+
+@keyframes sectionBreath {
+  0% { transform: scale(0.98) translate3d(-1%, 0, 0); }
+  100% { transform: scale(1.02) translate3d(1%, 1%, 0); }
+}
+
+@keyframes sectionOrbit {
+  0% { transform: rotate(0deg) scale(1.02); }
+  100% { transform: rotate(360deg) scale(1.02); }
 }
 
 @layer utilities {

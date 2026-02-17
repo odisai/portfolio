@@ -13,8 +13,10 @@ export function Navbar({ visible = true, className }: NavbarProps) {
   return (
     <nav
       className={cn(
-        "fixed top-0 left-0 right-0 z-50",
-        "px-6 md:px-10 py-6 flex items-center justify-between",
+        "fixed top-0 left-0 right-0 z-[10010]",
+        "px-6 md:px-10 py-5 flex items-center justify-between",
+        "border-b border-white/10",
+        "bg-[linear-gradient(180deg,rgba(14,15,19,0.88)_0%,rgba(14,15,19,0.58)_55%,rgba(14,15,19,0)_100%)] backdrop-blur-md",
         "transition-all duration-700",
         visible
           ? "opacity-100 translate-y-0"

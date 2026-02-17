@@ -90,10 +90,17 @@ export default function RootLayout({
       suppressHydrationWarning
     >
       <body className="bg-obsidian text-pearl antialiased">
-        {children}
+        <div className="site-shell">{children}</div>
+
+        <div className="global-atmosphere" aria-hidden="true">
+          <div className="atmosphere-mesh" />
+          <div className="atmosphere-bloom" />
+          <div className="atmosphere-haze" />
+          <div className="atmosphere-sweep" />
+        </div>
 
         {/* Global ledger grid texture */}
-        <div className="fixed inset-0 pointer-events-none opacity-[0.04]">
+        <div className="fixed inset-0 z-[9995] pointer-events-none opacity-[0.04]">
           <LedgerGrid />
         </div>
 
