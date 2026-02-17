@@ -1,188 +1,125 @@
 // ═══════════════════════════════════════════════════════════════════
-// ANIMATION CONSTANTS
-// ═══════════════════════════════════════════════════════════════════
-
-export const ANIMATION = {
-  // Intro sequence
-  INTRO: {
-    VOID_DURATION: 400,
-    GENESIS_DURATION: 800,
-    BURST_DURATION: 800,
-    FADE_DURATION: 400,
-    TOTAL_DURATION: 3200, // Total intro time before assembly starts
-  },
-
-  // Assembly animation
-  ASSEMBLY_DURATION: 2500,
-  ASSEMBLY_DURATION_MOBILE: 2000,
-  
-  // Fragment physics
-  FRAGMENT_DAMPING: 0.8,
-  FRAGMENT_STIFFNESS: 0.1,
-  MAGNETIC_THRESHOLD: 0.1,
-  
-  // Camera
-  CAMERA_IDLE_DRIFT: 0.5,
-  CAMERA_PARALLAX_INTENSITY: 2,
-  
-  // Scroll
-  SCROLL_TRIGGER_OFFSET: 0.2,
-  
-  // Easing (as CSS cubic-bezier strings)
-  EASE: {
-    OUT_EXPO: "cubic-bezier(0.16, 1, 0.3, 1)",
-    OUT_QUINT: "cubic-bezier(0.22, 1, 0.36, 1)",
-    IN_OUT_EXPO: "cubic-bezier(0.87, 0, 0.13, 1)",
-    SPRING: "cubic-bezier(0.34, 1.56, 0.64, 1)",
-  },
-
-  // Spring physics parameters (for GSAP elastic easing)
-  SPRING: {
-    ASSEMBLY_ELASTICITY: 0.8,
-    ASSEMBLY_DAMPING: 0.4,
-    SETTLE_ELASTICITY: 1.2,
-    SETTLE_DAMPING: 0.6,
-  },
-} as const;
-
-// ═══════════════════════════════════════════════════════════════════
-// SHADER CONSTANTS
-// ═══════════════════════════════════════════════════════════════════
-
-export const SHADER = {
-  // Fragment colors (as RGB arrays for shaders)
-  COLORS: {
-    // Darker searching state for more dramatic contrast
-    SEARCHING: [0.08, 0.08, 0.1],
-    // Toned down for better letter readability (was 0.92)
-    RESOLVED: [0.75, 0.75, 0.8],
-    // Vibrant iridescent colors
-    IRIDESCENT_BLUE: [0.2, 0.6, 1.0],
-    IRIDESCENT_PURPLE: [0.7, 0.3, 1.0],
-  },
-
-  // Base opacity for fragments (0-1, lower = more transparent)
-  BASE_OPACITY: 0.7,
-
-  // Post-processing - minimal bloom for crisp letters
-  BLOOM_INTENSITY: 0.12,
-  BLOOM_THRESHOLD: 0.9,
-  BLOOM_RADIUS: 0.25,
-  CHROMATIC_ABERRATION: 0.0002,
-
-  // Depth of Field settings
-  DOF: {
-    FOCUS_DISTANCE: 0,
-    FOCAL_LENGTH: 0.02,
-    BOKEH_SCALE: 2,
-    HEIGHT: 480,
-  },
-
-  // Lighting intensities - optimized for 3D letter readability
-  LIGHTING: {
-    KEY_INTENSITY: 1.1, // Increased for crisp letter definition
-    FILL_INTENSITY: 0.4,
-    RIM_INTENSITY: 0.3,
-    ACCENT_INTENSITY: 0.15, // Reduced purple for better clarity
-    AMBIENT_INTENSITY: 0.35,
-  },
-
-  // Atmospheric effects
-  ATMOSPHERIC: {
-    // Gradient orbs
-    ORB_COUNT: 3,
-    ORB_BASE_OPACITY: 0.35,
-    ORB_DRIFT_SPEED: 0.12,
-
-    // Text glow
-    GLOW_MAX_INTENSITY: 0.6,
-    GLOW_SCROLL_SCALE_MAX: 1.4,
-
-    // Film grain
-    GRAIN_BASE_OPACITY: 0.035,
-    GRAIN_INTENSITY: 0.7,
-    GRAIN_ANIMATION_FPS: 10,
-  },
-} as const;
-
-// ═══════════════════════════════════════════════════════════════════
-// LAYOUT CONSTANTS
-// ═══════════════════════════════════════════════════════════════════
-
-export const LAYOUT = {
-  // Breakpoints (matching Tailwind)
-  BREAKPOINTS: {
-    sm: 640,
-    md: 768,
-    lg: 1024,
-    xl: 1280,
-    "2xl": 1536,
-  },
-  
-  // Z-indices
-  Z_INDEX: {
-    BACKGROUND: -1,
-    DEFAULT: 0,
-    ELEVATED: 10,
-    NAV: 100,
-    MODAL: 200,
-    TOAST: 300,
-  },
-  
-  // Container max widths
-  MAX_WIDTH: {
-    CONTENT: 1400,
-    PROSE: 720,
-  },
-} as const;
-
-// ═══════════════════════════════════════════════════════════════════
-// PORTFOLIO CONTENT
+// PORTFOLIO CONTENT — Obsidian Atelier
 // ═══════════════════════════════════════════════════════════════════
 
 export const CONTENT = {
   NAME: "Taylor Allen",
-  TAGLINE: "Creating technology that matters",
+  TAGLINE: "Builder of premium, scalable systems",
   LOCATION: "Bay Area, CA",
-  
-  // Descriptor for hero
-  DESCRIPTOR: "Innovator. Builder. Architect.",
-  
-  // Social links
+  ROLE: "Founder • Full-Stack Engineer • Systems Architect",
+
   LINKS: {
     LINKEDIN: "https://www.linkedin.com/in/taylorallen0913",
     GITHUB: "https://github.com/taylorallen",
     EMAIL: "taylor@odisai.com",
+    CALENDLY: "https://calendly.com/taylorallen0913-abnr/30min",
   },
-  
-  // Projects
-  PROJECTS: {
-    CURRENT: {
-      name: "OdisAI",
-      role: "Co-Founder & CTO",
-      description: "Voice AI that answers your clinic's phones 24/7, books appointments, and handles follow-up calls",
-      credentials: ["UC Davis PLASMA Accelerator", "NSF I-Corps Regional", "NECX Elev X Phase 2"],
-    },
-    PAST: [
-      {
-        name: "Poppin",
-        role: "CTO & Co-Founder",
-        period: "May 2021 — Feb 2022",
-        description: "Social commerce platform. Led team from concept to shipped MVP.",
-      },
-      {
-        name: "Stanford Health Care",
-        role: "Solutions Architecture",
-        period: "May 2024 — May 2025",
-        description: "Enterprise architecture for one of the nation's leading health systems.",
-      },
-      {
-        name: "Sprift",
-        role: "CTO & Co-Founder",
-        period: "May 2023 — Jan 2024",
-        description: "Swipe. Shop. Save.",
-      },
+
+  HERO: {
+    POSITIONING:
+      "I design and ship durable software with founder-level ownership — from MVPs to enterprise scale.",
+    STATS: [
+      { label: "Requests handled", value: 100, suffix: "M+" },
+      { label: "Products shipped", value: 12, suffix: "+" },
+      { label: "Teams led", value: 4, suffix: "+" },
     ],
   },
-} as const;
 
+  CASE_STUDIES: [
+    {
+      id: "odisai",
+      title: "OdisAI",
+      role: "Co-Founder & CTO",
+      summary:
+        "Voice AI that answers clinic phones, books appointments, and automates follow-ups.",
+      highlights: [
+        "Real-time voice pipeline with retrieval + scheduling",
+        "Designed for 24/7 coverage and compliance",
+        "Optimized for low-latency, high conversion",
+      ],
+      metrics: ["98% answer rate", "-43% missed calls", "<1.2s response"],
+      stack: ["TypeScript", "Python", "Next.js", "FastAPI", "PostgreSQL"],
+    },
+    {
+      id: "poppin",
+      title: "Poppin",
+      role: "CTO & Co-Founder",
+      summary:
+        "Social commerce product with creator monetization and audience engagement.",
+      highlights: [
+        "Shipped MVP in 3 months",
+        "Built payments + creator payouts",
+        "Launched on iOS with realtime social feeds",
+      ],
+      metrics: ["3 month MVP", "2-person core team", "iOS launch"],
+      stack: ["React", "Node.js", "MongoDB", "Stripe", "AWS"],
+    },
+    {
+      id: "stanford",
+      title: "Stanford Health Care",
+      role: "Solutions Architecture",
+      summary:
+        "Enterprise systems serving millions of patients at one of the top U.S. hospital systems.",
+      highlights: [
+        "Architecture for 100M+ request scale",
+        "Security-first patterns across critical apps",
+        "Led cross-team integration strategy",
+      ],
+      metrics: ["100M+ requests", "Enterprise scale", "Mission critical"],
+      stack: ["Java", "Spring Boot", "Kubernetes", "Kafka", "AWS"],
+    },
+  ],
+
+  SIGNALS: [
+    "UC Davis PLASMA Accelerator",
+    "NSF I-Corps Regional",
+    "NECX Elev X Phase 2",
+    "3x Founder",
+    "Stanford Health Care",
+  ],
+
+  METHOD: [
+    {
+      title: "Align",
+      description:
+        "Pressure-test the problem, define success, and align incentives before a line of code.",
+    },
+    {
+      title: "Architect",
+      description:
+        "Design resilient systems that scale from day one without overbuilding.",
+    },
+    {
+      title: "Ship",
+      description:
+        "Move fast with production-grade quality, observability, and a tight feedback loop.",
+    },
+  ],
+
+  EXPERIENCE: [
+    {
+      year: "2025",
+      title: "OdisAI",
+      role: "Co-Founder & CTO",
+      summary: "Voice AI platform for clinical call handling.",
+    },
+    {
+      year: "2024",
+      title: "Stanford Health Care",
+      role: "Solutions Architecture",
+      summary: "Enterprise architecture for patient systems.",
+    },
+    {
+      year: "2023",
+      title: "Sprift",
+      role: "CTO & Co-Founder",
+      summary: "Social commerce platform and real-time shopping.",
+    },
+    {
+      year: "2021",
+      title: "Poppin",
+      role: "CTO & Co-Founder",
+      summary: "Creator commerce and monetization tools.",
+    },
+  ],
+} as const;

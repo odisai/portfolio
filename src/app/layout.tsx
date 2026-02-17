@@ -1,8 +1,9 @@
 import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
+import { LedgerGrid } from "@/components/ui/ledger-grid";
 
-// Display font - Satoshi Variable
+// Body font - Satoshi Variable
 const satoshi = localFont({
   src: [
     {
@@ -19,23 +20,6 @@ const satoshi = localFont({
   preload: true,
 });
 
-// Body font - Inter Variable
-const inter = localFont({
-  src: [
-    {
-      path: "../../public/fonts/InterVariable.woff2",
-      style: "normal",
-    },
-    {
-      path: "../../public/fonts/InterVariable-Italic.woff2",
-      style: "italic",
-    },
-  ],
-  variable: "--font-inter",
-  display: "swap",
-  preload: true,
-});
-
 // Mono font - JetBrains Mono
 const jetbrains = localFont({
   src: "../../public/fonts/JetBrainsMono.woff2.ttf",
@@ -48,14 +32,14 @@ export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   maximumScale: 5,
-  themeColor: "#0A0A0B",
+  themeColor: "#070708",
   colorScheme: "dark",
 };
 
 export const metadata: Metadata = {
   title: "Taylor Allen | Builder. Architect. Founder.",
   description:
-    "Co-Founder & CTO building technology that matters. From startup MVPs to enterprise health systems.",
+    "Founder and systems architect building premium software from MVP to enterprise scale.",
   keywords: [
     "Taylor Allen",
     "CTO",
@@ -68,7 +52,7 @@ export const metadata: Metadata = {
   creator: "Taylor Allen",
   openGraph: {
     title: "Taylor Allen | Builder. Architect. Founder.",
-    description: "Creating technology that matters.",
+    description: "Designing and shipping durable software systems.",
     url: "https://taylorallen.dev",
     siteName: "Taylor Allen",
     locale: "en_US",
@@ -85,7 +69,7 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "Taylor Allen | Builder. Architect. Founder.",
-    description: "Creating technology that matters.",
+    description: "Designing and shipping durable software systems.",
     images: ["/og-image.png"],
   },
   robots: {
@@ -102,14 +86,21 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${satoshi.variable} ${inter.variable} ${jetbrains.variable}`}
+      className={`${satoshi.variable} ${jetbrains.variable}`}
       suppressHydrationWarning
     >
-      <body className="bg-space text-white antialiased">
+      <body className="bg-obsidian text-pearl antialiased">
         {children}
-        
+
+        {/* Global ledger grid texture */}
+        <div className="fixed inset-0 pointer-events-none opacity-[0.08]">
+          <LedgerGrid />
+        </div>
+
         {/* Noise overlay for cinematic grain */}
         <div className="noise-overlay" aria-hidden="true" />
+        {/* Vignette for depth */}
+        <div className="vignette-overlay" aria-hidden="true" />
       </body>
     </html>
   );
