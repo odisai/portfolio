@@ -38,7 +38,7 @@ export const ContainerScroll = ({
 
   return (
     <div
-      className="h-[60rem] md:h-[80rem] flex items-center justify-center relative p-2 md:p-20"
+      className="h-240 md:h-320 flex items-center justify-center relative p-2 md:p-20"
       ref={containerRef}
     >
       <div
@@ -98,7 +98,7 @@ export const Card = ({
         boxShadow:
           "0 0 #0000004d, 0 9px 20px #0000004a, 0 37px 37px #00000042, 0 84px 50px #00000026, 0 149px 60px #0000000a, 0 233px 65px #00000003",
       }}
-      className="max-w-5xl -mt-12 mx-auto h-[30rem] md:h-[40rem] w-full border-4 border-[#6C6C6C] p-2 md:p-6 bg-[#222222] rounded-[30px] shadow-2xl"
+      className="max-w-5xl -mt-12 mx-auto h-120 md:h-160 w-full border-4 border-[#6C6C6C] p-2 md:p-6 bg-[#222222] rounded-[30px] shadow-2xl"
     >
       <div className="h-full w-full overflow-hidden rounded-2xl bg-gray-100 dark:bg-zinc-900 md:rounded-2xl md:p-4">
         {children}
@@ -138,7 +138,8 @@ export const IPhoneCard = ({
       <div
         className="absolute inset-0 rounded-[52px] md:rounded-[58px]"
         style={{
-          background: "linear-gradient(145deg, #2a2a2e 0%, #1c1c1e 50%, #151517 100%)",
+          background:
+            "linear-gradient(145deg, #2a2a2e 0%, #1c1c1e 50%, #151517 100%)",
           boxShadow: `
             inset 0 0.5px 0 rgba(255,255,255,0.08),
             inset 0 -0.5px 0 rgba(0,0,0,0.5),
@@ -151,28 +152,31 @@ export const IPhoneCard = ({
       />
 
       {/* Titanium edge highlight — top */}
-      <div className="absolute top-0 left-[20%] right-[20%] h-px bg-gradient-to-r from-transparent via-white/[0.12] to-transparent rounded-full" />
+      <div className="absolute top-0 left-[20%] right-[20%] h-px bg-linear-to-r from-transparent via-white/12 to-transparent rounded-full" />
 
       {/* Side buttons — left: silent switch + volume */}
       <div
         className="absolute -left-[2.5px] top-[18%] w-[3px] h-[4%] rounded-l-sm"
         style={{
           background: "linear-gradient(180deg, #3a3a3e, #2a2a2e, #1a1a1e)",
-          boxShadow: "inset 0 0.5px 0 rgba(255,255,255,0.1), -1px 0 2px rgba(0,0,0,0.3)",
+          boxShadow:
+            "inset 0 0.5px 0 rgba(255,255,255,0.1), -1px 0 2px rgba(0,0,0,0.3)",
         }}
       />
       <div
         className="absolute -left-[2.5px] top-[26%] w-[3px] h-[7%] rounded-l-sm"
         style={{
           background: "linear-gradient(180deg, #3a3a3e, #2a2a2e, #1a1a1e)",
-          boxShadow: "inset 0 0.5px 0 rgba(255,255,255,0.1), -1px 0 2px rgba(0,0,0,0.3)",
+          boxShadow:
+            "inset 0 0.5px 0 rgba(255,255,255,0.1), -1px 0 2px rgba(0,0,0,0.3)",
         }}
       />
       <div
         className="absolute -left-[2.5px] top-[35%] w-[3px] h-[7%] rounded-l-sm"
         style={{
           background: "linear-gradient(180deg, #3a3a3e, #2a2a2e, #1a1a1e)",
-          boxShadow: "inset 0 0.5px 0 rgba(255,255,255,0.1), -1px 0 2px rgba(0,0,0,0.3)",
+          boxShadow:
+            "inset 0 0.5px 0 rgba(255,255,255,0.1), -1px 0 2px rgba(0,0,0,0.3)",
         }}
       />
 
@@ -181,7 +185,8 @@ export const IPhoneCard = ({
         className="absolute -right-[2.5px] top-[28%] w-[3px] h-[10%] rounded-r-sm"
         style={{
           background: "linear-gradient(180deg, #3a3a3e, #2a2a2e, #1a1a1e)",
-          boxShadow: "inset 0 0.5px 0 rgba(255,255,255,0.1), 1px 0 2px rgba(0,0,0,0.3)",
+          boxShadow:
+            "inset 0 0.5px 0 rgba(255,255,255,0.1), 1px 0 2px rgba(0,0,0,0.3)",
         }}
       />
 
@@ -189,7 +194,8 @@ export const IPhoneCard = ({
       <div
         className="absolute inset-[3.5%] rounded-[44px] md:rounded-[48px] overflow-hidden"
         style={{
-          boxShadow: "inset 0 0 0 0.5px rgba(0,0,0,0.8), inset 0 0 8px rgba(0,0,0,0.5)",
+          boxShadow:
+            "inset 0 0 0 0.5px rgba(0,0,0,0.8), inset 0 0 8px rgba(0,0,0,0.5)",
         }}
       >
         {/* Screen glass layer */}
@@ -206,16 +212,14 @@ export const IPhoneCard = ({
             {/* Camera lens */}
             <div className="absolute right-[18%] w-[8px] h-[8px] md:w-[10px] md:h-[10px] rounded-full bg-[#0c0c10] border border-[#1a1a20]">
               <div className="absolute inset-[2px] rounded-full bg-[#0f0f15] border border-[#252530]">
-                <div className="absolute top-[1px] left-[1px] w-[2px] h-[2px] rounded-full bg-[#2a2a40]/40" />
+                <div className="absolute top-px left-px w-[2px] h-[2px] rounded-full bg-[#2a2a40]/40" />
               </div>
             </div>
           </div>
         </div>
 
         {/* Screen content — clipped to screen bounds */}
-        <div className="relative h-full w-full overflow-hidden">
-          {children}
-        </div>
+        <div className="relative h-full w-full overflow-hidden">{children}</div>
 
         {/* Home indicator */}
         <div className="absolute bottom-[1.2%] left-1/2 -translate-x-1/2 z-30">

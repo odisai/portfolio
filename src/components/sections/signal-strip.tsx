@@ -12,7 +12,7 @@ export function SignalStrip() {
   const useStaticStrip = reducedMotion || isMobile || isLowEnd || isTouch;
 
   return (
-    <section className="depth-section depth-signal signal-strip relative overflow-hidden bg-[var(--color-obsidian)]">
+    <section className="depth-section depth-signal signal-strip relative overflow-hidden bg-obsidian">
       <div className="container-portfolio relative z-10">
         <BlurFade>
           <div className="signal-strip-header">
@@ -27,10 +27,7 @@ export function SignalStrip() {
         {useStaticStrip ? (
           <div className="signal-strip-static overflow-x-auto whitespace-nowrap [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
             {CONTENT.SIGNALS.map((signal) => (
-              <span
-                key={signal}
-                className="signal-strip-pill"
-              >
+              <span key={signal} className="signal-strip-pill">
                 {signal}
               </span>
             ))}

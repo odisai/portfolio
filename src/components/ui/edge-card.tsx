@@ -11,7 +11,7 @@ export function EdgeCard({ children, className }: EdgeCardProps) {
       className={cn(
         "edge-cut copper-trace surface-card backdrop-blur-md",
         "relative overflow-hidden",
-        className
+        className,
       )}
     >
       <div
@@ -22,7 +22,7 @@ export function EdgeCard({ children, className }: EdgeCardProps) {
         }}
       />
       <div className="absolute inset-0 opacity-30">
-        <div className="absolute -right-20 -top-20 h-48 w-48 rounded-full bg-[var(--color-copper)]/10 blur-[60px]" />
+        <div className="absolute -right-20 -top-20 h-48 w-48 rounded-full bg-copper/10 blur-[60px]" />
       </div>
       <div className="relative z-10">{children}</div>
     </div>

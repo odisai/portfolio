@@ -10,8 +10,8 @@ export function Experience() {
       className="depth-section depth-experience relative overflow-hidden py-section bg-obsidian scroll-mt-28 md:scroll-mt-32"
     >
       <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute inset-x-0 top-0 h-28 bg-gradient-to-b from-black/58 to-transparent" />
-        <div className="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-black/44 to-transparent" />
+        <div className="absolute inset-x-0 top-0 h-28 bg-linear-to-b from-black/58 to-transparent" />
+        <div className="absolute inset-x-0 bottom-0 h-20 bg-linear-to-t from-black/44 to-transparent" />
         <div className="absolute top-[15%] left-[12%] h-[220px] w-[220px] rounded-full bg-white/5 blur-[110px]" />
       </div>
       <div className="container-portfolio relative z-10">

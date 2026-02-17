@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { CONTENT } from "@/lib/constants";
 import { BlurFade } from "@/components/ui/blur-fade";
 import { Monogram } from "@/components/ui/monogram";
@@ -12,18 +12,13 @@ export function Contact() {
   const reducedMotion = useReducedMotion();
   const { isMobile, isLowEnd, isTouch } = useDeviceCapabilities();
   const shouldDeferEmbed = reducedMotion || isMobile || isLowEnd || isTouch;
-  const [showEmbed, setShowEmbed] = useState(!shouldDeferEmbed);
-
-  useEffect(() => {
-    if (!shouldDeferEmbed) {
-      setShowEmbed(true);
-    }
-  }, [shouldDeferEmbed]);
+  const [userRequestedEmbed, setUserRequestedEmbed] = useState(false);
+  const showEmbed = userRequestedEmbed || !shouldDeferEmbed;
 
   return (
     <section
       id="contact"
-      className="depth-section depth-contact relative overflow-hidden py-section bg-[var(--color-obsidian)] scroll-mt-28 md:scroll-mt-32"
+      className="depth-section depth-contact relative overflow-hidden py-section bg-obsidian scroll-mt-28 md:scroll-mt-32"
     >
       <div className="absolute inset-0 pointer-events-none">
         <div className="absolute bottom-[10%] right-[10%] h-[260px] w-[260px] rounded-full bg-copper/6 blur-[120px]" />
@@ -109,7 +104,7 @@ export function Contact() {
                   <div className="flex flex-wrap gap-3">
                     <button
                       type="button"
-                      onClick={() => setShowEmbed(true)}
+                      onClick={() => setUserRequestedEmbed(true)}
                       className="px-4 py-2 border border-copper text-[#120d0a] bg-copper uppercase tracking-[0.28em] text-[0.6rem]"
                     >
                       Load Scheduler

@@ -87,7 +87,7 @@ function TranscriptBubble({
         <div
           className={`max-w-[80%] rounded-2xl px-3 py-2 text-[10px] leading-[1.4] ${
             isAI
-              ? "bg-white/[0.06] text-pearl/85 border border-white/10"
+              ? "bg-white/6 text-pearl/85 border border-white/10"
               : "bg-copper/20 text-pearl border border-copper/30"
           }`}
         >
@@ -107,7 +107,7 @@ function TranscriptBubble({
       <div
         className={`max-w-[80%] rounded-2xl px-3 py-2 text-[10px] leading-[1.4] ${
           isAI
-            ? "bg-white/[0.06] text-pearl/85 border border-white/10"
+            ? "bg-white/6 text-pearl/85 border border-white/10"
             : "bg-copper/20 text-pearl border border-copper/30"
         }`}
       >
@@ -122,7 +122,9 @@ function OdisAIPreview() {
   const { isMobile, isLowEnd, isTouch } = useDeviceCapabilities();
   const [step, setStep] = useState<CallStep>("incoming");
   const previewRef = useRef<HTMLDivElement>(null);
-  const isPreviewInView = useInView(previewRef, { margin: "-20% 0px -20% 0px" });
+  const isPreviewInView = useInView(previewRef, {
+    margin: "-20% 0px -20% 0px",
+  });
   const minimalMode = reducedMotion || isMobile || isLowEnd || isTouch;
 
   useEffect(() => {
@@ -177,7 +179,9 @@ function OdisAIPreview() {
                 {effectiveStepIndex === 0 ? "Ringing" : "Live"}
               </div>
             </div>
-            {effectiveStepIndex === 0 && !minimalMode && <PulseRings count={2} />}
+            {effectiveStepIndex === 0 && !minimalMode && (
+              <PulseRings count={2} />
+            )}
           </div>
 
           <div className="mt-4 flex-1 overflow-hidden rounded-xl border border-white/10 bg-black/60 p-3">
@@ -212,8 +216,8 @@ function OdisAIPreview() {
           </div>
 
           <AnimatePresence mode="wait">
-            {effectiveStepIndex >= 2 && (
-              minimalMode ? (
+            {effectiveStepIndex >= 2 &&
+              (minimalMode ? (
                 <div className="mt-4 rounded-2xl border border-copper/30 bg-copper/12 p-3">
                   <p className="text-[10px] text-copper">Appointment booked</p>
                   <p className="text-[9px] text-pearl/60">
@@ -234,11 +238,10 @@ function OdisAIPreview() {
                     Tomorrow · 9:00 AM · Dr. Chen
                   </p>
                 </motion.div>
-              )
-            )}
+              ))}
           </AnimatePresence>
 
-          <div className="mt-4 rounded-2xl border border-white/15 bg-white/[0.04] p-3">
+          <div className="mt-4 rounded-2xl border border-white/15 bg-white/4 p-3">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-[10px] text-pearl/80">98% Answer Rate</p>
