@@ -17,6 +17,16 @@ const nextConfig: NextConfig = {
   // Empty turbopack config to suppress warning when using webpack
   turbopack: {},
 
+  // Remote image domains
+  images: {
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "lh3.googleusercontent.com",
+      },
+    ],
+  },
+
   // Security headers
   async headers() {
     return [

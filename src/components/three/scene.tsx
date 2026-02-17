@@ -3,7 +3,12 @@
 import { Suspense, useRef, useMemo } from "react";
 import { Canvas } from "@react-three/fiber";
 import { Preload, Environment } from "@react-three/drei";
-import { EffectComposer, Bloom, ChromaticAberration, DepthOfField } from "@react-three/postprocessing";
+import {
+  EffectComposer,
+  Bloom,
+  ChromaticAberration,
+  DepthOfField,
+} from "@react-three/postprocessing";
 import { BlendFunction } from "postprocessing";
 import * as THREE from "three";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
@@ -17,8 +22,12 @@ interface SceneProps {
 
 function PostProcessing() {
   const offset = useMemo(
-    () => new THREE.Vector2(SHADER.CHROMATIC_ABERRATION, SHADER.CHROMATIC_ABERRATION),
-    []
+    () =>
+      new THREE.Vector2(
+        SHADER.CHROMATIC_ABERRATION,
+        SHADER.CHROMATIC_ABERRATION,
+      ),
+    [],
   );
 
   return (

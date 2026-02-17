@@ -1,194 +1,114 @@
 "use client";
 
-import { useState } from "react";
-import { motion } from "framer-motion";
 import { CONTENT } from "@/lib/constants";
-import { SectionLabel } from "@/components/ui/section-label";
+import { BlurFade } from "@/components/ui/blur-fade";
+import { Monogram } from "@/components/ui/monogram";
 import { Footer } from "@/components/layout/footer";
-import { ShimmerButton } from "@/components/ui/shimmer-button";
-import { useSectionInView } from "@/hooks/useSectionInView";
-
-// Reduced to 8 fragments for cleaner look
-const FRAGMENT_POSITIONS = [
-  { left: 15, top: 20, rotate: 12 },
-  { left: 80, top: 15, rotate: 35 },
-  { left: 25, top: 70, rotate: 8 },
-  { left: 85, top: 55, rotate: 42 },
-  { left: 50, top: 85, rotate: 22 },
-  { left: 65, top: 35, rotate: 5 },
-  { left: 10, top: 45, rotate: 38 },
-  { left: 90, top: 75, rotate: 15 },
-];
 
 export function Contact() {
-  const { ref, isInView } = useSectionInView();
-  const [email, setEmail] = useState("");
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isSubmitted, setIsSubmitted] = useState(false);
-  const [error, setError] = useState("");
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!email) return;
-
-    setIsSubmitting(true);
-    setError("");
-
-    try {
-      const response = await fetch("/api/contact", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email }),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || "Failed to submit");
-      }
-
-      setIsSubmitted(true);
-      setEmail("");
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "An error occurred");
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
   return (
     <section
-      ref={ref}
-      className="relative min-h-screen py-32 bg-[#0A0A0B] flex flex-col"
+      id="contact"
+      className="depth-section depth-contact relative overflow-hidden py-section bg-(--color-obsidian) scroll-mt-28 md:scroll-mt-32"
     >
-      {/* Floating fragments constellation */}
-      <div className="absolute inset-0 pointer-events-none overflow-hidden">
-        {FRAGMENT_POSITIONS.map((pos, i) => (
-          <motion.div
-            key={i}
-            initial={{ opacity: 0 }}
-            animate={isInView ? { opacity: 0.1 } : {}}
-            transition={{ duration: 1, delay: i * 0.1 }}
-            className="absolute w-4 h-4 bg-white/5 rounded-sm"
-            style={{
-              left: `${pos.left}%`,
-              top: `${pos.top}%`,
-              transform: `rotate(${pos.rotate}deg)`,
-            }}
-          />
-        ))}
+      <div className="absolute inset-0 pointer-events-none">
+        <div className="absolute bottom-[10%] right-[10%] h-[260px] w-[260px] rounded-full bg-copper/6 blur-[120px]" />
       </div>
-
-      <div className="container-portfolio relative z-10 flex-1 flex flex-col justify-center">
-        <SectionLabel>Open Channel</SectionLabel>
-
-        {/* Main CTA */}
-        <motion.div
-          initial={{ opacity: 0, y: 40 }}
-          animate={isInView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.8, delay: 0.2 }}
-          className="mb-16"
-        >
-          <h2 className="text-[clamp(2.5rem,10vw,6rem)] font-light tracking-tight text-white leading-[0.95] mb-6">
-            Let&apos;s build
-            <br />
-            something.
-          </h2>
-          <p className="text-lg text-white/50 max-w-md">
-            Have a project in mind? I&apos;m always open to discussing new opportunities
-            and ideas.
+      <div className="container-portfolio relative z-10">
+        <BlurFade>
+          <p className="text-[0.65rem] tracking-[0.4em] uppercase text-pearl/70">
+            Book a Call
           </p>
-        </motion.div>
+          <h2 className="mt-4 text-display text-[clamp(2.5rem,7vw,5rem)] leading-[1.02]">
+            Let&apos;s build something that lasts.
+          </h2>
+        </BlurFade>
 
-        {/* Contact form */}
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={isInView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.6, delay: 0.4 }}
-          className="mb-16 max-w-md"
-        >
-          {isSubmitted ? (
-            <div className="p-6 rounded-xl border border-green-500/30 bg-green-500/5">
-              <p className="text-green-400">Thanks! I&apos;ll be in touch soon.</p>
+        <BlurFade delay={0.15}>
+          <p className="mt-6 max-w-2xl text-lg text-pearl/80">
+            Share the brief, and I&apos;ll respond with a focused plan and next
+            steps.
+          </p>
+        </BlurFade>
+
+        <BlurFade delay={0.2}>
+          <div className="mt-10 flex flex-wrap gap-4">
+            <a
+              href={CONTENT.LINKS.CALENDLY}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="px-6 py-3 border border-copper text-[#120d0a] bg-copper uppercase tracking-[0.35em] text-[0.65rem] shadow-[0_0_20px_rgba(227,176,122,0.35)] hover:shadow-[0_0_30px_rgba(227,176,122,0.5)] transition-shadow"
+            >
+              Book a Call
+            </a>
+            <a
+              href={`mailto:${CONTENT.LINKS.EMAIL}`}
+              className="px-6 py-3 border border-white/10 text-pearl/70 uppercase tracking-[0.35em] text-[0.65rem] hover:border-white/30 hover:text-pearl transition-colors"
+            >
+              Email
+            </a>
+          </div>
+        </BlurFade>
+
+        <BlurFade delay={0.3}>
+          <div className="mt-12 grid grid-cols-1 lg:grid-cols-[1.2fr_1fr] gap-8">
+            <div className="edge-cut copper-trace surface-card p-6">
+              <p className="text-[0.65rem] tracking-[0.4em] uppercase text-pearl/40">
+                Availability
+              </p>
+              <p className="mt-4 text-sm text-pearl/80">
+                Currently accepting a limited number of premium engagements.
+              </p>
+              <div className="mt-6 flex items-center gap-3 text-pearl/60">
+                <span className="h-2 w-2 rounded-full bg-copper" />
+                <span className="text-xs uppercase tracking-[0.35em]">
+                  Open
+                </span>
+              </div>
+              <div className="mt-8 flex items-center gap-3 text-pearl/70">
+                <Monogram className="h-10 w-10" />
+                <span className="text-xs uppercase tracking-[0.35em]">
+                  {CONTENT.LOCATION}
+                </span>
+              </div>
             </div>
-          ) : (
-            <>
-              <form onSubmit={handleSubmit} className="flex gap-3">
-                <div className="relative flex-1 group">
-                  <input
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder="your@email.com"
-                    className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white placeholder:text-white/30 focus:outline-none focus:border-blue-500/50 transition-all duration-300"
-                    required
-                  />
-                  {/* Focus glow effect */}
-                  <div className="absolute inset-0 rounded-lg bg-blue-500/20 opacity-0 blur-xl transition-opacity duration-300 pointer-events-none group-focus-within:opacity-100" />
-                </div>
-                <ShimmerButton
-                  type="submit"
-                  disabled={isSubmitting}
-                  shimmerColor="#60a5fa"
-                  shimmerSize="0.06em"
-                  background="rgba(255, 255, 255, 0.95)"
-                  borderRadius="8px"
-                  className="px-6 py-3 text-sm font-medium text-black disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {isSubmitting ? "..." : "Send"}
-                </ShimmerButton>
-              </form>
-              {error && (
-                <p className="mt-3 text-sm text-red-400">{error}</p>
-              )}
-            </>
-          )}
-        </motion.div>
 
-        {/* Social links */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={isInView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.6, delay: 0.5 }}
-          className="flex flex-wrap gap-6 mb-16"
-        >
-          <a
-            href={`mailto:${CONTENT.LINKS.EMAIL}`}
-            className="text-sm text-white/50 hover:text-white transition-colors"
-          >
-            Email
-          </a>
-          <a
-            href={CONTENT.LINKS.LINKEDIN}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-sm text-white/50 hover:text-white transition-colors"
-          >
-            LinkedIn
-          </a>
-          <a
-            href={CONTENT.LINKS.GITHUB}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-sm text-white/50 hover:text-white transition-colors"
-          >
-            GitHub
-          </a>
-        </motion.div>
+            <div className="edge-cut copper-trace surface-card p-4">
+              <iframe
+                title="Calendly"
+                src={CONTENT.LINKS.CALENDLY}
+                className="h-[420px] w-full rounded-xl border border-white/10"
+              />
+            </div>
+          </div>
+        </BlurFade>
 
-        {/* Location & availability */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={isInView ? { opacity: 1 } : {}}
-          transition={{ duration: 0.6, delay: 0.6 }}
-          className="flex items-center gap-4 mb-24"
-        >
-          <span className="text-xs text-white/40">{CONTENT.LOCATION}</span>
-          <span className="flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
-            <span className="text-xs text-white/40">Available for projects</span>
-          </span>
-        </motion.div>
+        <BlurFade delay={0.35}>
+          <div className="mt-12 flex flex-wrap gap-6 text-[0.7rem] uppercase tracking-[0.35em] text-pearl/70">
+            <a
+              href={`mailto:${CONTENT.LINKS.EMAIL}`}
+              className="hover:text-pearl transition-colors"
+            >
+              Email
+            </a>
+            <a
+              href={CONTENT.LINKS.LINKEDIN}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:text-pearl transition-colors"
+            >
+              LinkedIn
+            </a>
+            <a
+              href={CONTENT.LINKS.GITHUB}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:text-pearl transition-colors"
+            >
+              GitHub
+            </a>
+          </div>
+        </BlurFade>
       </div>
 
       <Footer />

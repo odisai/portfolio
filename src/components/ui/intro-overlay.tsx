@@ -10,22 +10,28 @@ interface IntroOverlayProps {
 }
 
 export type IntroPhase =
-  | "void"      // Initial dark state
-  | "genesis"   // Point of light emerges
-  | "burst"     // Explosion outward
-  | "ready"     // Ready for assembly
+  | "void" // Initial dark state
+  | "genesis" // Point of light emerges
+  | "burst" // Explosion outward
+  | "ready" // Ready for assembly
   | "complete"; // Intro finished
 
-export function IntroOverlay({ onIntroComplete, onPhaseChange }: IntroOverlayProps) {
+export function IntroOverlay({
+  onIntroComplete,
+  onPhaseChange,
+}: IntroOverlayProps) {
   const [isVisible, setIsVisible] = useState(true);
   const overlayRef = useRef<HTMLDivElement>(null);
   const orbRef = useRef<HTMLDivElement>(null);
   const ringsRef = useRef<HTMLDivElement>(null);
   const timelineRef = useRef<gsap.core.Timeline | null>(null);
 
-  const updatePhase = useCallback((newPhase: IntroPhase) => {
-    onPhaseChange?.(newPhase);
-  }, [onPhaseChange]);
+  const updatePhase = useCallback(
+    (newPhase: IntroPhase) => {
+      onPhaseChange?.(newPhase);
+    },
+    [onPhaseChange],
+  );
 
   useEffect(() => {
     if (!overlayRef.current || !orbRef.current) return;
@@ -35,7 +41,7 @@ export function IntroOverlay({ onIntroComplete, onPhaseChange }: IntroOverlayPro
         updatePhase("complete");
         setIsVisible(false);
         onIntroComplete();
-      }
+      },
     });
 
     timelineRef.current = tl;
@@ -47,25 +53,30 @@ export function IntroOverlay({ onIntroComplete, onPhaseChange }: IntroOverlayPro
     tl.call(() => updatePhase("genesis"), [], 0.4);
 
     // Orb scales up with pulse
-    tl.fromTo(orbRef.current,
+    tl.fromTo(
+      orbRef.current,
       { scale: 0, opacity: 0 },
       {
         scale: 1,
         opacity: 1,
         duration: 0.8,
-        ease: "power2.out"
+        ease: "power2.out",
       },
-      0.4
+      0.4,
     );
 
     // Orb pulses
-    tl.to(orbRef.current, {
-      scale: 1.2,
-      duration: 0.3,
-      ease: "power2.inOut",
-      yoyo: true,
-      repeat: 1,
-    }, 1.2);
+    tl.to(
+      orbRef.current,
+      {
+        scale: 1.2,
+        duration: 0.3,
+        ease: "power2.inOut",
+        yoyo: true,
+        repeat: 1,
+      },
+      1.2,
+    );
 
     // Phase 3: BURST - explosion (2-2.8s)
     tl.call(() => updatePhase("burst"), [], 2);
@@ -73,32 +84,44 @@ export function IntroOverlay({ onIntroComplete, onPhaseChange }: IntroOverlayPro
     // Rings expand
     if (ringsRef.current) {
       const rings = ringsRef.current.children;
-      tl.to(rings, {
-        scale: 15,
-        opacity: 0,
-        duration: 0.8,
-        ease: "power2.out",
-        stagger: 0.1,
-      }, 2);
+      tl.to(
+        rings,
+        {
+          scale: 15,
+          opacity: 0,
+          duration: 0.8,
+          ease: "power2.out",
+          stagger: 0.1,
+        },
+        2,
+      );
     }
 
     // Orb expands and fades
-    tl.to(orbRef.current, {
-      scale: 3,
-      opacity: 0,
-      duration: 0.6,
-      ease: "power2.in",
-    }, 2.1);
+    tl.to(
+      orbRef.current,
+      {
+        scale: 3,
+        opacity: 0,
+        duration: 0.6,
+        ease: "power2.in",
+      },
+      2.1,
+    );
 
     // Phase 4: READY - overlay fades (2.8-3.2s)
     tl.call(() => updatePhase("ready"), [], 2.8);
 
     // Overlay fades to transparent
-    tl.to(overlayRef.current, {
-      opacity: 0,
-      duration: 0.4,
-      ease: "power2.inOut",
-    }, 2.8);
+    tl.to(
+      overlayRef.current,
+      {
+        opacity: 0,
+        duration: 0.4,
+        ease: "power2.inOut",
+      },
+      2.8,
+    );
 
     return () => {
       tl.kill();
@@ -110,7 +133,7 @@ export function IntroOverlay({ onIntroComplete, onPhaseChange }: IntroOverlayPro
       {isVisible && (
         <motion.div
           ref={overlayRef}
-          className="fixed inset-0 z-[200] flex items-center justify-center bg-[#050505] pointer-events-none"
+          className="fixed inset-0 z-200 flex items-center justify-center bg-[#050505] pointer-events-none"
           initial={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.3 }}
@@ -127,33 +150,38 @@ export function IntroOverlay({ onIntroComplete, onPhaseChange }: IntroOverlayPro
           <div
             ref={orbRef}
             className="relative w-16 h-16 opacity-0"
-            style={{ transform: 'scale(0)' }}
+            style={{ transform: "scale(0)" }}
           >
             {/* Core glow */}
-            <div className="absolute inset-0 rounded-full bg-gradient-to-br from-[#60a5fa] via-[#a855f7] to-[#ec4899] blur-sm" />
+            <div className="absolute inset-0 rounded-full bg-linear-to-br from-[#60a5fa] via-[#a855f7] to-[#ec4899] blur-sm" />
 
             {/* Inner core */}
-            <div className="absolute inset-2 rounded-full bg-gradient-to-br from-white/90 to-[#60a5fa]/80" />
+            <div className="absolute inset-2 rounded-full bg-linear-to-br from-white/90 to-[#60a5fa]/80" />
 
             {/* Shimmer effect */}
             <div
               className="absolute inset-0 rounded-full animate-spin"
               style={{
-                background: 'conic-gradient(from 0deg, transparent, rgba(255,255,255,0.3), transparent)',
-                animationDuration: '2s',
+                background:
+                  "conic-gradient(from 0deg, transparent, rgba(255,255,255,0.3), transparent)",
+                animationDuration: "2s",
               }}
             />
           </div>
 
           {/* Expansion rings */}
-          <div ref={ringsRef} className="absolute inset-0 flex items-center justify-center pointer-events-none">
+          <div
+            ref={ringsRef}
+            className="absolute inset-0 flex items-center justify-center pointer-events-none"
+          >
             {[...Array(3)].map((_, i) => (
               <div
                 key={i}
                 className="absolute w-16 h-16 rounded-full border opacity-40"
                 style={{
-                  borderColor: i === 0 ? '#60a5fa' : i === 1 ? '#a855f7' : '#ec4899',
-                  borderWidth: '1px',
+                  borderColor:
+                    i === 0 ? "#60a5fa" : i === 1 ? "#a855f7" : "#ec4899",
+                  borderWidth: "1px",
                 }}
               />
             ))}
@@ -163,7 +191,8 @@ export function IntroOverlay({ onIntroComplete, onPhaseChange }: IntroOverlayPro
           <div
             className="absolute inset-0 pointer-events-none"
             style={{
-              background: 'radial-gradient(ellipse at center, transparent 0%, transparent 40%, rgba(0,0,0,0.4) 100%)',
+              background:
+                "radial-gradient(ellipse at center, transparent 0%, transparent 40%, rgba(0,0,0,0.4) 100%)",
             }}
           />
         </motion.div>
